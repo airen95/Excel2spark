@@ -1,0 +1,6 @@
+output/*
+*ipynb
+*crc
+*xlsx
+*pyc
+src/*/*pyc
