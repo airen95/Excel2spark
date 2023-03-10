@@ -1,5 +1,6 @@
 from omegaconf import OmegaConf
-from src.flow_process.flow_output import *
+from src.flow_process.flow_1 import flow_1 
+from src.flow_process.flow_2 import flow_2 
 import time
 from src.utils import write_excel
 
