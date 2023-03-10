@@ -139,6 +139,7 @@ def write_excel(frame, path_save: str):
     frame.write\
       .format("com.crealytics.spark.excel")\
       .option("header", "true")\
+      .mode('overwrite')\
       .save(path_save)
       
     # f_pandas = frame.toPandas()

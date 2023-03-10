@@ -20,4 +20,12 @@ if __name__ == "__main__":
     #flow_2:
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
 
+    write_excel(table_1, paths[0])
+    write_excel(table_2, paths[1])
+    write_excel(table_3, paths[2])
+    write_excel(table_od, paths[5])
+    write_excel(table_cc, paths[6])
+    write_excel(table_5, paths[4])
+    write_excel(table_6, paths[7])
+
     print(f'Process in {time.time() - t1:.2f}')
