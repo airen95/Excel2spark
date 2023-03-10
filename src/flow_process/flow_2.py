@@ -12,10 +12,10 @@ import pandas as pd
 # flow 2:
 # 3 cột cuối, 5 cột O, bảng 6 (AU), bảng 5 cột P, bảng 6, bảng 11
 
-def flow_table_3_for_flow2(frame):
+def flow_table_3_for_flow2(path):
     """Table 3 with last col"""
+    # frame = read_excel(path)
     frame = final_col(frame)
-
     return frame
 
 
@@ -46,8 +46,8 @@ def flow_table_5_for_col_P(frame):
     
     return frame,
 
-def flow_table_11(path_exposure: str):
-    exposure = read_excel(path_exposure)
+def flow_table_11(table_6):
+    # exposure = read_excel(path_exposure)
     on, off = table_output(exposure)
 
     on_table = pd.DataFrame()
@@ -67,5 +67,11 @@ def flow_table_11(path_exposure: str):
        
     return on_table, off_table
 
-def flow_2():
-    pass
+def flow_2(table_3, table_5, table_6):
+    table_3 = flow_table_3_for_flow2(table_3)
+    table_5 = flow_table_5_for_col_O(table_5)
+    table_6 = flow_table_6_for_flow2(table_6)
+    table_5 = flow_table_5_for_col_P(table_5)
+    on_table, off_table = flow_table_11(table_6)
+
+    return table_3, table_5, table_6, on_table, off_table
