@@ -32,6 +32,15 @@ def make_spark_mapping(sheet_name: str, table_name: str):
     tmp = spark.createDataFrame(tmp, schema=df_schema)
     return tmp
 
+def make_spark_mapping_SCRA(sheet_name: str, table_name: str):
+    tmp = pd.read_excel('/content/drive/MyDrive/Excel2spark/input_test/SCRA.xlsx', sheet_name = sheet_name)
+    [r1, c1, c2] = config[sheet_name][table_name]['index']
+    schema = config[sheet_name][table_name]['schema']
+    tmp = tmp.iloc[r1:, c1:c2].reset_index(drop='True')
+    df_schema = StructType(schema)
+    tmp = spark.createDataFrame(tmp, schema=df_schema)
+    return tmp
+
 def read_excel(path, sheet_name: str = None):
     if sheet_name:
         df = spark.read.format("com.crealytics.spark.excel") \
@@ -131,6 +140,10 @@ def write_excel(frame, path_save: str):
       .format("com.crealytics.spark.excel")\
       .option("header", "true")\
       .save(path_save)
+      
+    # f_pandas = frame.toPandas()
+    # f_pandas.to_excel('./output/customer.xlsx', index=False)
+    
 
 def check_numeric(value: Tuple[int, float]):
     try:

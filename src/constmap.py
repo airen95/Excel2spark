@@ -1,6 +1,17 @@
 from pyspark.sql.types import *
 
 
+scra_columns = {'A': 'CUSTOMER_ID',
+ 'B':str("1. Does the counterparty bank has adequate capacity to meet their financial commitments (including repayments of principal and interest) in a timely manner, for the projected life of the assets or exposures and irrespective of the economic cycles and business conditions? (Y/N)"),
+ 'C':"2. Does the counterparty bank meet or exceed the published minimum regulatory requirements and buffers established by its national supervisor except for bank-specific minimum regulatory requirements or buffers that may be imposed through supervisory actions (eg via Pillar 2) and not made public? (Y/N)",
+ 'D':"3. Does the counterparty bank subject to substantial credit risk, such as repayment capacities that are dependent on stable or favourable economic or business conditions? (Y/N)",
+ 'E':"4. Does the counterparty bank meet or exceed the published minimum regulatory requirements (excluding buffers) established by its national supervisor  except for bank-specific minimum regulatory requirements or buffers that may be imposed through supervisory actions (eg via Pillar 2) and not made public? (Y/N)",
+ 'F':"5. Does the counterparty bank has material default risks and limited margins of safety. For e.g., are these counterparties have adverse business, financial, or economic conditions that are very likely to lead, or have led, to an inability to meet their financial commitments? (Y/N)",
+ 'G':"6. Does the counterparty bank does not meet the criteria for being classifed as Grade B with respect to its published minimum regulatory requirements? (Y/N)",
+ 'H':"7. Does the external auditor has issued an adverse audit opinion or has expressed substantial doubt about the counterparty bank’s ability to continue as a going concern in its financial statements or audited reports within the previous 12 months? (Y/N)",
+ 'I':"#. Does the bank have a CET1 ratio which meets or exceeds 14% and a Tier 1 leverage ratio which meets or exceeds 5%?"}
+
+
 config = {
     '9. REG TABLE': {
         'SPECIFIC PROVISIONS BUCKETS': {'index':[7, 23, 26],\
@@ -27,16 +38,24 @@ config = {
                        ]         
 
         },
-        'COLL MATURITY BUCKETS': {'index': [7, 19, 22],
-            'schema': [StructField("MIN_MATURITY", StringType(), True)\
-                       ,StructField("MAX_MATURITY", StringType(), True),StructField("MATURITY_BUCKET", StringType(), True)  
-                       ]          
+        'RETAIL QUALIFYING CRITERIA': {'index': [7, 34, 36],\
+            'schema': [StructField("LABEL", StringType(), True)\
+                       ,StructField("VALUE", StringType(), True)\
+                       ]            
+
+        },
+        'RATING TABLE': {'index': [7, 2, 5],
+            'schema': [StructField("RATING_AGENCY_CD", StringType(), True)\
+                       ,StructField("CUSTOMER_RATING", StringType(), True)\
+                       ,StructField("RATING_CD", StringType(), True)\
+                       ]           
+
         },
         'HAIRCUT TABLE': {'index': [7, 12, 14],
-                    'schema': [StructField("HAIRCUT_CD", StringType(), True)\
-                            ,StructField("HAIRCUT%", StringType(), True)\
-                            ]           
-                }
+            'schema': [StructField("HAIRCUT_CD", StringType(), True)\
+                       ,StructField("HAIRCUT%", StringType(), True)\
+                       ]           
+        }
     },
     '7. REG TABLE CAL': {
         'RATING TABLE MAPPING' : {'index': [9, 13, 15],\
@@ -62,19 +81,38 @@ config = {
                        ,StructField("PRODUCT_TYPE", StringType(), True)\
                        ,StructField("PRODUCT_SUB_TYPE", StringType(), True)\
                        ]
-            },
+        },
         'haircut': {'index': [9, 19, 21],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("HAIRCUT_CD", StringType(), True)
                        ]          
 
         },
+        'counterparty_mapping': {'index': [9, 1, 4],\
+            'schema': [StructField("Concatenated column", StringType(), True)\
+                       ,StructField("CPTY_TYPE", StringType(), True)\
+                       ,StructField("CPTY_SUB_TYPE", StringType(), True)\
+                       ]
+        },
         'collateral_mapping': {'index': [9, 9, 12],\
             'schema': [StructField("COLL_TYPE", StringType(), True)\
                        ,StructField("CRM_CD", StringType(), True)\
                        ,StructField("ELIGIBLE_CRM", StringType(), True)\
-                       ]         
-
+                       ]
+        }
+    },
+    '2. SCRA': {
+        'SCRA' : {'index': [9, 0, 9],\
+            'schema': [StructField(scra_columns['A'], StringType(), True)\
+                       ,StructField(scra_columns['B'], StringType(), True)\
+                       ,StructField(scra_columns['C'], StringType(), True)\
+                       ,StructField(scra_columns['D'], StringType(), True)\
+                       ,StructField(scra_columns['E'], StringType(), True)\
+                       ,StructField(scra_columns['F'], StringType(), True)\
+                       ,StructField(scra_columns['G'], StringType(), True)\
+                       ,StructField(scra_columns['H'], StringType(), True)\
+                       ,StructField(scra_columns['I'], StringType(), True)\
+                    ]
         }
     }
 }
