@@ -24,15 +24,19 @@ config = {
         'CCF TABLE': {'index': [7, 9, 11],
             'schema': [StructField("CCF_CD", StringType(), True)\
                        ,StructField("CCF%", StringType(), True)\
-                       ]           
+                       ]         
 
         },
-        'RETAIL QUALIFYING CRITERIA': {'index': [7, 34, 36],\
-            'schema': [StructField("LABEL", StringType(), True)\
-                       ,StructField("VALUE", StringType(), True)\
-                       ]            
-
-        }
+        'COLL MATURITY BUCKETS': {'index': [7, 19, 22],
+            'schema': [StructField("MIN_MATURITY", StringType(), True)\
+                       ,StructField("MAX_MATURITY", StringType(), True),StructField("MATURITY_BUCKET", StringType(), True)  
+                       ]          
+        },
+        'HAIRCUT TABLE': {'index': [7, 12, 14],
+                    'schema': [StructField("HAIRCUT_CD", StringType(), True)\
+                            ,StructField("HAIRCUT%", StringType(), True)\
+                            ]           
+                }
     },
     '7. REG TABLE CAL': {
         'RATING TABLE MAPPING' : {'index': [9, 13, 15],\
@@ -58,7 +62,20 @@ config = {
                        ,StructField("PRODUCT_TYPE", StringType(), True)\
                        ,StructField("PRODUCT_SUB_TYPE", StringType(), True)\
                        ]
-            }
+            },
+        'haircut': {'index': [9, 19, 21],\
+            'schema': [StructField("Concatenated column", StringType(), True)\
+                       ,StructField("HAIRCUT_CD", StringType(), True)
+                       ]          
+
+        },
+        'collateral_mapping': {'index': [9, 9, 12],\
+            'schema': [StructField("COLL_TYPE", StringType(), True)\
+                       ,StructField("CRM_CD", StringType(), True)\
+                       ,StructField("ELIGIBLE_CRM", StringType(), True)\
+                       ]         
+
+        }
     }
 }
 

@@ -15,5 +15,6 @@ if __name__ == "__main__":
     # exposure = exposure.select(*select_columns)
     # write_excel(exposure, path_save)
     on_table, off_table = flow_credit_output(path_exposure)
-    print(on_table.head())
+    on_table.to_csv('on_table.csv')
+    off_table.to_csv('off_table.csv')
     print(f'Process in {time.time() - t1:.2f}')

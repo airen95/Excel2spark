@@ -76,19 +76,32 @@ def make_lookup(frame, key_col, val_col):
 #     except:
 #         return "ERROR IN CONFIG"
 
-def find_ltv(ltv_dct):
+# def find_ltv(ltv_dct):
+#     def f(x):
+#         try: 
+#             value_in = float(x)
+#             for level, value in ltv_dct.items():
+#                 if value_in <= value:
+#                     return level
+#             return "ERROR IN CONFIG"
+#         except:
+#             return "ERROR IN CONFIG"
+#     return udf(f)
+
+# find_ltv = udf(find_ltv, MapType(StringType(), StringType()))
+
+def find_ltv(ltv_dct, alternative):
     def f(x):
         try: 
             value_in = float(x)
+            # print(value_in)
             for level, value in ltv_dct.items():
                 if value_in <= value:
                     return level
-            return "ERROR IN CONFIG"
+            return alternative
         except:
-            return "ERROR IN CONFIG"
+            return alternative
     return udf(f)
-
-# find_ltv = udf(find_ltv, MapType(StringType(), StringType()))
 
 def map_dct(ccf_dct):
     def ff(value_in):
@@ -148,3 +161,8 @@ def check_zero(value:  Tuple[int, float]):
 check_zero = udf(check_zero, IntegerType())
 check_divide = udf(check_divide, IntegerType())
 check_numeric = udf(check_numeric, IntegerType())
+
+def concat_col():
+    def f(x: list):
+        return (''.join([i for i in x if i])).lstrip()
+    return udf(f, StringType())

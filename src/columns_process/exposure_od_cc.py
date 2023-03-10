@@ -267,7 +267,7 @@ def ltv_bucket(frame):
 
     frame = frame.withColumn('LTV Bucket',\
     when((is_error(col('LTV')) == 1) | (col('LTV').isNull()), 'N/A').otherwise(\
-        find_ltv(ltv_dct)(col('LTV'))))
+        find_ltv(ltv_dct, 'ERROR IN CONFIG')(col('LTV'))))
 
     return frame
 
