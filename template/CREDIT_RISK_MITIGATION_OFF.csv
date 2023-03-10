@@ -1,0 +1,27 @@
+ASSET CLASSES,EAD BEFORE CRM,COLL AMT,NETTING AMT,GUARANTEE AMT,RWA WITH CRM,RWA WITHOUT CRM,% of RWA,OUTSTANDING AMOUNT,ACCURED INTEREST,OUTSTANDING FEE,EAD AFTER CRM,TOTAL
+"CASH, GOLD AND CASH EQUIVALENT",-,-,-,-,-,-,0.0,-,-,-,-,-
+EXPOSURE TO SOVEREIGNS,-,-,-,-,-,-,0.0,-,-,-,-,-
+VAMC/DATC,-,-,-,-,-,-,0.0,-,-,-,-,-
+SOVEREIGN,-,-,-,-,-,-,0.0,-,-,-,-,-
+EXPOSURE TO PSEs,-,-,-,-,-,-,0.0,-,-,-,-,-
+EXPOSURE TO MDBs,-,-,-,-,-,-,0.0,-,-,-,-,-
+EXPOSURE TO BANKS,-,-,-,-,-,-,0.0,-,-,-,-,-
+EXPOSURE TO CORPORATES,-,-,-,-,-,-,0.0,-,-,-,-,-
+GENERAL CORPORATE EXPOSURE,-,-,-,-,-,-,0.0,-,-,-,-,-
+SPECIALIZED LENDING EXPOSURE,-,-,-,-,-,-,0.0,-,-,-,-,-
+RETAIL EXPOSURES,"120,707,378",-,-,-,"120,707,378","120,707,378",1.0,-,-,-,"120,707,378",-
+REGULATORY RETAIL,-,-,-,-,-,-,0.0,-,-,-,-,-
+TRANSACTORS,-,-,-,-,-,-,0.0,-,-,-,-,-
+REGULATORY RETAIL SME,-,-,-,-,-,-,0.0,-,-,-,-,-
+OTHER RETAIL,"120,707,378",-,-,-,"120,707,378","120,707,378",1.0,-,-,-,"120,707,378",-
+REAL ESTATE EXPOSURE,-,-,-,-,-,-,0.0,-,-,-,-,-
+COMMERCIAL REAL ESTATE,-,-,-,-,-,-,0.0,-,-,-,-,-
+INCOME PRODUCING CRE,-,-,-,-,-,-,0.0,-,-,-,-,-
+GENERAL CRE,-,-,-,-,-,-,0.0,-,-,-,-,-
+RESIDENTIAL REAL ESTATE,-,-,-,-,-,-,0.0,-,-,-,-,-
+INCOME PRODUCING RRE,-,-,-,-,-,-,0.0,-,-,-,-,-
+GENERAL RRE,-,-,-,-,-,-,0.0,-,-,-,-,-
+"LAND ACQUISITION, DEVELOPMENT AND CONSTRUCTION",-,-,-,-,-,-,0.0,-,-,-,-,-
+DEFAULTED EXPOSURES,-,-,-,-,-,-,0.0,-,-,-,-,-
+SUBORDINATED DEBT AND EQUITY,-,-,-,-,-,-,0.0,-,-,-,-,-
+OTHER ASSETS,-,-,-,-,-,-,0.0,-,-,-,-,-

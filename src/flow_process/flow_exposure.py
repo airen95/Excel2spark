@@ -1,7 +1,7 @@
-from .columns_process import *
-from .utils import *
+from src.columns_process import exposure_od_cc
+from src.utils import *
 
-def flow(path_exposure: str):
+def flow_exposure(path_exposure: str):
     exposure = read_excel(path_exposure)
 
     exposure = original_maturity(exposure)

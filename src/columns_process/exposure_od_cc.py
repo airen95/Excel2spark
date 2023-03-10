@@ -46,12 +46,12 @@ def cpty_type_cpty_sub_type_borrower_income_source_curr(frame):
 
 def loan_retail_exposure_secured_by_real_estate(frame):
     condition_in = ['CLASS_OTH_RETAIL', 'CLASS_REG_RETAIL', 'CLASS_SME']
-    condition_frame = ['Income CRE', 'General CRE', 'General RRE', 'ADC']
+    condition_out = ['Income CRE', 'General CRE', 'General RRE', 'ADC']
     sum1 = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_AMT / UTILIZED LIMIT']
-    sum2 = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY']
+    # sum2 = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY']
     frame = frame.withColumn('LOAN_RETAIL_EXPOSURE NOT SECURED BY REAL ESTATE',\
-        when(col('ASSET_CLASS_FINAL').isin(condition_in) & ~col('ASSET_CLASS_MANUAL').isin(condition_frame),\
-            when(col('OUTSTANDING_AMT / UTILIZED LIMIT')== 'NA', reduce(add, [col(x) for x in sum2])).otherwise(reduce(add, [col(x) for x in sum1])))\
+        when((col('ASSET_CLASS_FINAL').isin(condition_in)) & ((~col('ASSET_CLASS_MANUAL').isin(condition_out))| (col('ASSET_CLASS_MANUAL').isNull())),\
+            when(col('OUTSTANDING_AMT / UTILIZED LIMIT')== 'NA', reduce(add, [col(x) for x in sum1[:-1]])).otherwise(reduce(add, [col(x) for x in sum1])))\
             .otherwise('N/A')
     
         )
@@ -80,8 +80,8 @@ def transactor_flag(frame):
     od = read_excel(source.data_path['od'])
     cc  = read_excel(source.data_path['cc'])
 
-    frame = frame.join(od, frame.CUSTOMER_ID == od['Mã KH'], how = 'left').select(frame['*'], od['Transactor flag'].alias('flag1'))
-    frame = frame.join(cc, frame.CUSTOMER_ID == cc['CLIENT_CODE'], how = 'left').select(frame['*'], cc['Transactor flag'].alias('flag2'))
+    frame = frame.join(od, frame.EXPOSURE_ID == od['Số TK vay'], how = 'left').select(frame['*'], od['Transactor flag'].alias('flag1'))
+    frame = frame.join(cc, frame.EXPOSURE_ID == cc['Số TK'], how = 'left').select(frame['*'], cc['Transactor flag'].alias('flag2'))
 
     frame = frame.withColumn('TRANSACTOR_FLAG', coalesce('flag1', 'flag2')).drop('flag1', 'flag2')
     frame = frame.fillna({"TRANSACTOR_FLAG": "N"})
@@ -90,8 +90,8 @@ def transactor_flag(frame):
 def specific_provision(frame):
     # condition_in = ['0', 'NA', ""]
     frame = frame.withColumn('Specific Provision %', \
-        when((is_error(col('SPECIFIC_PROVISION')) ==1) | (is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT'))==1), 0).\
-            otherwise(col('SPECIFIC_PROVISION')/col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')))
+        when((is_error(col('SPECIFIC_PROVISION')) ==1) | (col('SPECIFIC_PROVISION').isNull()) | (is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT'))==1), 0).\
+            otherwise((col('SPECIFIC_PROVISION')/col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')).cast('double')))
     return frame
 
 def regulatory_retail_flag_b4(frame):
@@ -554,5 +554,43 @@ def final_cols(frame):
     return frame
 
 
-    
 
+############################33
+def transactor_flag_od():
+    frame = read_excel(source.data_path['od'])
+
+    cols1 = frame.columns[4:15]
+    cols2 = frame.columns[3:14]
+
+    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:-1]]))\
+    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in od.columns[3:-1]]))\
+    .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
+    .withColumn('Transactor flag',\
+        when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))
+        ).drop('numeric_count', 'check_zero', 'check_if')
+
+    return frame
+
+def transactor_flag_cc():
+    frame = read_excel(source.data_path['cc'])
+
+    cols1 = frame.columns[4:16]
+    cols2 = frame.columns[17:29]
+
+    cols4 = frame.columns[18:30]
+    cols3 = frame.columns[5:17]
+
+    frame = frame.withColumn('count1',\
+        reduce(add, [check_numeric(col(x)) for x in cols1]) + reduce(add, [check_numeric(col(x)) for x in cols2]))\
+        .withColumn('minus1', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols1, cols2)]))\
+        .withColumn('count2',\
+        reduce(add, [check_numeric(col(x)) for x in cols3]) + reduce(add, [check_numeric(col(x)) for x in cols4]))\
+        .withColumn('minus2', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols3, cols4)]))\
+        .withColumn('Transactor flag',\
+        when(col('Tag_trano').isin('M', 'JCB'),\
+            when((col('count1') == 24) & (col('minus1') == 0), 'Y').otherwise('N')
+            ).otherwise(\
+                when((col('count2') == 24) & (col('minus2') == 0), 'Y').otherwise('N')
+                )).drop('cunt1', 'count2', 'minus1', 'minus2')
+
+    return frame

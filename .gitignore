@@ -4,3 +4,4 @@ output/*
 *xlsx
 *pyc
 src/*/*pyc
+ipynb_checkpoints
