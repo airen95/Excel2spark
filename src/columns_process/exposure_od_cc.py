@@ -7,7 +7,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
+from src.utils import *
 
 source = OmegaConf.load('config/source.yaml')
 
@@ -27,8 +27,8 @@ def residual_maturity(frame):
 
 
 
-def cpty_type_cpty_sub_type_borrower_income_source_curr(frame):
-    customer = read_excel(source.data_path['customer'])
+def cpty_type_cpty_sub_type_borrower_income_source_curr(frame, customer):
+    # customer = read_excel(source.data_path['customer'])
 
     key1 = 'CUSTOMER_ID'
     key2 = key1
@@ -76,9 +76,9 @@ def reg_retail_8b_flag(frame):
 
 
 
-def transactor_flag(frame):
-    od = read_excel(source.data_path['od'])
-    cc  = read_excel(source.data_path['cc'])
+def transactor_flag(frame, od, cc):
+    # od = read_excel(source.data_path['od'])
+    # cc  = read_excel(source.data_path['cc'])
 
     frame = frame.join(od, frame.EXPOSURE_ID == od['Số TK vay'], how = 'left').select(frame['*'], od['Transactor flag'].alias('flag1'))
     frame = frame.join(cc, frame.EXPOSURE_ID == cc['Số TK'], how = 'left').select(frame['*'], cc['Transactor flag'].alias('flag2'))
@@ -230,11 +230,11 @@ def exposure_percent(frame):
     frame = frame.withColumn('EXPOSURE %', when(col('EXPOSURE %').isNull(), 0).otherwise(col('EXPOSURE %'))).drop('sum1', 'groupH', 'groupI', 'groupJ')
     return frame
 
-def ltv(frame):
-    collateral = read_excel(source.data_path['collateral'])
+def ltv(frame, collateral):
+    # collateral = read_excel(source.data_path['collateral'])
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['COLL_TYPE','ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY',\
-        'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    cols = ['COLL_TYPE','COLL_CCY', 'ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY']#,\
+        # 'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
 
     frame = join_frame(frame, collateral, key1, key2, cols)
     condition = ["CRE_GEN","CRE_INC","RRE_GEN","RRE_INC"]
@@ -404,13 +404,14 @@ def adjusted_coll_maturity(frame):
     frame = frame.fillna({'ADJUSTED_COLL_MATURITY': 0})
     return frame
 
-def final_adjusted_coll(frame):
+def final_adjusted_coll(frame, collateral):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
 
-    # key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    # cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT', 'COLL_CCY']
-    # frame = join
+    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    frame = join_frame(frame, collateral, key1, key2, cols)
+    # frame = frame.joim()
 
     frame = frame.fillna( {'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT':0, 'COLL_CCY': 'N/A'})
     frame = frame.withColumn('tmpsum1',\
@@ -435,8 +436,8 @@ def netting_value_adjusted(frame):
             when(col('NETTING_VALUE_ADJUSTED').isNull(), 'CHECK ERROR').otherwise(col('NETTING_VALUE_ADJUSTED'))).drop('NETTING_EXPOSURE_VALUE')
     return frame
 
-def adjusted_guarantee_maturity(frame):
-    guarantee = read_excel(source.data_path['guarantee'])
+def adjusted_guarantee_maturity(frame, guarantee):
+    # guarantee = read_excel(source.data_path['guarantee'])
     cols = ['GUARANTEE_ORIGINAL_MATURITY',
     'GUARANTEE_REMAINING_MATURITY',
     'ELIGIBLE_GUARANTEE_FLAG',
@@ -563,7 +564,7 @@ def transactor_flag_od():
     cols2 = frame.columns[3:14]
 
     frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:-1]]))\
-    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in od.columns[3:-1]]))\
+    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:-1]]))\
     .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
     .withColumn('Transactor flag',\
         when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))

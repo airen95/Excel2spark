@@ -22,20 +22,20 @@ def flow_table_2():
     """Table 2"""
     frame = make_spark_mapping_SCRA('2. SCRA', 'SCRA')
     frame = scra_group(frame)
-    write_excel(frame, path)      
+    # write_excel(frame, path)     
     return frame
 
-def flow_od(path_od: str):
+def flow_od():
     """Table OD"""
-    frame = read_excel(path_od)
-    frame = transactor_flag_od(frame)
+    # frame = read_excel(path_od)
+    frame = transactor_flag_od()
     # write_excel(frame, path_od)
     return frame
 
-def flow_cc(path_cc: str):
+def flow_cc():
     """Table CC"""
-    frame = read_excel(path_cc)
-    frame = transactor_flag_cc(frame)
+    # frame = read_excel(path_cc)
+    frame = transactor_flag_cc()
     # write_excel(frame, path_cc)
     return frame
 
@@ -65,16 +65,16 @@ def flow_table_5_for_flow1(path: str):
    
     return frame
 
-def flow_table_6_for_flow1(path_exposure: str):
-    """Table 6 to column AT"""
+def flow_table_6_for_flow1(path_exposure: str, table_1, table_3, table_5, table_od, table_cc):
+    """Table 6 to column AQ"""
     exposure = read_excel(path_exposure)
 
     exposure = original_maturity(exposure)
     exposure = residual_maturity(exposure)
-    exposure = cpty_type_cpty_sub_type_borrower_income_source_curr(exposure)
+    exposure = cpty_type_cpty_sub_type_borrower_income_source_curr(exposure, table_1)
     exposure = loan_retail_exposure_secured_by_real_estate(exposure)
     exposure = reg_retail_8b_flag(exposure)
-    exposure = transactor_flag(exposure)
+    exposure = transactor_flag(exposure, table_od, table_cc)
     exposure = specific_provision(exposure)
     exposure = regulatory_retail_flag_b4(exposure)
     exposure = prd_cd_prd_sub_cd(exposure)
@@ -82,7 +82,7 @@ def flow_table_6_for_flow1(path_exposure: str):
     exposure = specific_provision_bucket(exposure)
     exposure = cust_rating(exposure)
     exposure = exposure_percent(exposure)
-    exposure = ltv(exposure)
+    exposure = ltv(exposure, table_3)
     exposure = ltv_bucket(exposure)
     exposure = ccf(exposure)
     exposure = re_eligible_p60(exposure)
@@ -90,9 +90,9 @@ def flow_table_6_for_flow1(path_exposure: str):
     exposure = rw(exposure)
     exposure = rw_cc(exposure)
     exposure = adjusted_coll_maturity(exposure)
-    exposure = final_adjusted_coll(exposure)
-    exposure = netting_value_adjusted(exposure)
-    exposure = adjusted_guarantee_maturity(exposure)
+    # exposure = final_adjusted_coll(exposure, table_3)
+    # exposure = netting_value_adjusted(exposure)
+    # exposure = adjusted_guarantee_maturity(exposure, table_5)
     # write_excel(frame, path_exposure)
    
     # exposure = final_adjusted_guarantee(exposure)
@@ -108,10 +108,10 @@ def flow_table_6_for_flow1(path_exposure: str):
 
 def flow_1(path_1, path_2, path_3, path_5, path_od, path_cc, path_exposure):
     table_1 = flow_table_1(path_1)
-    table_2 = flow_table_2(path_2)
+    table_2 = flow_table_2()
     table_od = flow_od(path_od)
     table_cc = flow_cc(path_cc)
     table_3 = table_flow_table_3_for_flow1(path_3)
     table_5 = flow_table_5_for_flow1(path_5)
-    table_6 = flow_table_6_for_flow1(path_exposure)
+    table_6 = (path_exposure, table_1, table_3, table_5, table_od, table_cc)
     return table_1, table_2, table_3, table_od, table_cc, table_5, table_6

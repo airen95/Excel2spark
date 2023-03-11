@@ -7,8 +7,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
-from .constmap import *
+from src.utils import *
+from src.constmap import *
 
 source = OmegaConf.load('config/source.yaml')
 
@@ -122,10 +122,10 @@ def crm_eligible(frame):
     
     return frame
 
-def final_col(frame):
+def final_col(frame, exposure):
     """=SUMIFS($'6. EXPOSURE'.AQ:AQ,$'6. EXPOSURE'.B:B,$'3. COLLATERAL'.B2)*$'3. COLLATERAL'.U2*(1-T2)
     """
-    exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
+    # exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
     
     key1="CUSTOMER_ID"
     key2="CUSTOMER_ID"
