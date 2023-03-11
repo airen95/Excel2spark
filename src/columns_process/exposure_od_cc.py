@@ -7,7 +7,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
+from src.utils import *
 
 source = OmegaConf.load('config/source.yaml')
 
@@ -209,7 +209,7 @@ def cust_rating(frame):
             rating_table_mapping['RATING_CD'].alias('CUST_RATING1'))
     frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))
 
-    customer = read_excel('/home/dieule/Downloads/input_test/CUSTOMER.xlsx')
+    customer = read_excel(source.data_path['customer'])
     frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['tmp2'] != "COVERED BOND RATED"), how = 'left')\
         .select(frame['*'], customer['CUST_RATING_CD'].alias('CUST_RATING2'))
 

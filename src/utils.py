@@ -5,7 +5,9 @@ import pandas as pd
 from .constmap import *
 from typing import Tuple
 
-spark = SparkSession.builder.config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2").getOrCreate()
+spark = SparkSession.builder.config("spark.driver.memory","4g").\
+    config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2")\
+        .getOrCreate()
 
 def replace_null(c, alternate):
     if not c:

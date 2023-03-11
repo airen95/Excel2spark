@@ -27,16 +27,29 @@ config = {
                        ]         
 
         },
+        'RETAIL QUALIFYING CRITERIA': {'index': [7, 34, 36],\
+            'schema': [StructField("LABEL", StringType(), True)\
+                       ,StructField("VALUE", StringType(), True)\
+                       ]            
+
+        },
+        'RATING TABLE': {'index': [7, 2, 5],
+            'schema': [StructField("RATING_AGENCY_CD", StringType(), True)\
+                       ,StructField("CUSTOMER_RATING", StringType(), True)\
+                       ,StructField("RATING_CD", StringType(), True)\
+                       ]           
+
+        },
+        'HAIRCUT TABLE': {'index': [7, 12, 14],
+            'schema': [StructField("HAIRCUT_CD", StringType(), True)\
+                       ,StructField("HAIRCUT%", StringType(), True)\
+                       ]           
+        },
         'COLL MATURITY BUCKETS': {'index': [7, 19, 22],
             'schema': [StructField("MIN_MATURITY", StringType(), True)\
                        ,StructField("MAX_MATURITY", StringType(), True),StructField("MATURITY_BUCKET", StringType(), True)  
                        ]          
-        },
-        'HAIRCUT TABLE': {'index': [7, 12, 14],
-                    'schema': [StructField("HAIRCUT_CD", StringType(), True)\
-                            ,StructField("HAIRCUT%", StringType(), True)\
-                            ]           
-                }
+        }
     },
     '7. REG TABLE CAL': {
         'RATING TABLE MAPPING' : {'index': [9, 13, 15],\
@@ -62,21 +75,40 @@ config = {
                        ,StructField("PRODUCT_TYPE", StringType(), True)\
                        ,StructField("PRODUCT_SUB_TYPE", StringType(), True)\
                        ]
-            },
+        },
         'haircut': {'index': [9, 19, 21],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("HAIRCUT_CD", StringType(), True)
                        ]          
 
         },
+        'counterparty_mapping': {'index': [9, 1, 4],\
+            'schema': [StructField("Concatenated column", StringType(), True)\
+                       ,StructField("CPTY_TYPE", StringType(), True)\
+                       ,StructField("CPTY_SUB_TYPE", StringType(), True)\
+                       ]
+        },
         'collateral_mapping': {'index': [9, 9, 12],\
             'schema': [StructField("COLL_TYPE", StringType(), True)\
                        ,StructField("CRM_CD", StringType(), True)\
                        ,StructField("ELIGIBLE_CRM", StringType(), True)\
-                       ]         
-
+                       ]
         }
     }
+    # '2. SCRA': {
+    #     'SCRA' : {'index': [9, 0, 9],\
+    #         'schema': [StructField(scra_columns['A'], StringType(), True)\
+    #                    ,StructField(scra_columns['B'], StringType(), True)\
+    #                    ,StructField(scra_columns['C'], StringType(), True)\
+    #                    ,StructField(scra_columns['D'], StringType(), True)\
+    #                    ,StructField(scra_columns['E'], StringType(), True)\
+    #                    ,StructField(scra_columns['F'], StringType(), True)\
+    #                    ,StructField(scra_columns['G'], StringType(), True)\
+    #                    ,StructField(scra_columns['H'], StringType(), True)\
+    #                    ,StructField(scra_columns['I'], StringType(), True)\
+    #                 ]
+    #     }
+    # }
 }
 
 output_config = {

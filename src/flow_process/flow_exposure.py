@@ -1,4 +1,4 @@
-from src.columns_process import exposure_od_cc
+from src.columns_process.exposure_od_cc import *
 from src.utils import *
 
 def flow_exposure(path_exposure: str):
@@ -7,9 +7,6 @@ def flow_exposure(path_exposure: str):
     exposure = original_maturity(exposure)
     exposure = residual_maturity(exposure)
     exposure = cpty_type_cpty_sub_type_borrower_income_source_curr(exposure)
-    #----------------------------------------------
-    exposure = exposure.withColumn('ASSET_CLASS_MANUAL', lit('DMDM')) #temporary
-    # #-----------------------------------------------
     exposure = loan_retail_exposure_secured_by_real_estate(exposure)
     exposure = reg_retail_8b_flag(exposure)
     exposure = transactor_flag(exposure)

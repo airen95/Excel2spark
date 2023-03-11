@@ -1,5 +1,5 @@
 data_path:
-  exposure : '/home/dieule/Downloads/input_test/EXPOSURE.xlsx'
+  exposure : '/home/dieule/Desktop/input_test/EXPOSURE.xlsx'
   cc : '/home/dieule/Downloads/input_test/CC.xlsx'
   od : '/home/dieule/Downloads/input_test/OD.xlsx'
   collateral : '/home/dieule/Downloads/input_test/Collateral.xlsx'
