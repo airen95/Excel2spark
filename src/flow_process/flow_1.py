@@ -111,7 +111,7 @@ def flow_1(path_1, path_2, path_3, path_5, path_exposure):
     table_2 = flow_table_2()
     table_od = flow_od()
     table_cc = flow_cc()
-    table_3 = flow_table_3_for_flow1(path_3)
+    table_3 = table_flow_table_3_for_flow1(path_3)
     table_5 = flow_table_5_for_flow1(path_5)
     table_6 = (path_exposure, table_1, table_3, table_5, table_od, table_cc)
     return table_1, table_2, table_3, table_od, table_cc, table_5, table_6
