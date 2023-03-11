@@ -54,7 +54,7 @@ def rating_cd(frame):
     return frame
 
 def crm_cd_eligible_crm(frame):
-    rating_table = make_spark_mapping('7. REG TABLE CAL', 'collateral_mapping')
+    collateral_mapping = make_spark_mapping('7. REG TABLE CAL', 'collateral_mapping')
     concat_cols = ['COLL_TYPE', 'COLL_RATING_CD', 'COLL_ORIGINAL_MATURITY_BUCKET']
     lst = ["CRM_DEBT_OTH_BANK","CRM_DEBT_OTH_CORP","CRM_VAL_PAPER_FOR_GOV","CRM_VAL_PAPER_GOV_SBV","CRM_DEBT_PSE"]
 
@@ -65,7 +65,7 @@ def crm_cd_eligible_crm(frame):
     key1, key2 = 'concat', 'COLL_TYPE'
     cols = ['CRM_CD', 'ELIGIBLE_CRM']
 
-    frame = join_frame(frame, rating_table, key1, key2, cols).drop('concat')
+    frame = join_frame(frame, collateral_mapping, key1, key2, cols).drop('concat')
     return frame
 
 def haircut_cd(frame):
@@ -79,7 +79,7 @@ def haircut_cd(frame):
         when(col('COLL_TYPE').isin(lst), concat_col()(struct([col(x) for x in concat_cols]))).otherwise(concat_col()(struct([col(x) for x in concat_cols[:3]])))
         )
 
-    frame =  frame.join(haircut_mapping, t['concat'] == haircut_mapping['Concatenated column'], how = 'left').select(t['*'], haircut_mapping['HAIRCUT_CD'].alias('tmp'))
+    frame =  frame.join(haircut_mapping, frame['concat'] == haircut_mapping['Concatenated column'], how = 'left').select(frame['*'], haircut_mapping['HAIRCUT_CD'].alias('tmp'))
     frame =  frame.fillna({'tmp': 'N/A'})
 
     frame =  frame.withColumn('HAIRCUT_CD',\
@@ -136,6 +136,6 @@ def final_col(frame):
     window_spec = Window.partitionBy(col("CUSTOMER_ID"))
     frame = frame.withColumn("sum", 
                             sum(col('ADJUSTED_COLL_MATURITY')).over(window_spec)) \
-                .withColumn("ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT", col("sum")*col("COLL_CRM_ELIGIBLE %") * (1-col('HAIRCUT%'))).drop('sum')
+                .withColumn("ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT", col("sum")*col("COLL_CRM_ELIGIBLE %") * (1-col('HAIRCUT%'))).drop('sum', cols[0])
     
     return frame

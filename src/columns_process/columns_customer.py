@@ -47,8 +47,8 @@ def cust_rating_cd(frame):
     rating_dct = make_lookup(rating_mapping, 'Concatenated column', 'RATING_CD')
     
     ###
-    scra = pd.read_excel('/home/dieule/Downloads/input_test/SCRA.xlsx', header = 1)
-    scra_dct = {str(k): v for k, v in zip(scra['CUSTOMER_ID'], scra['SCRA Group'])}
+    # scra = pd.read_excel('/home/dieule/Downloads/input_test/SCRA.xlsx', header = 1)
+    scra_dct = make_lookup(table_2, 'Concatenated column', 'SCRA Group')
 
     ###
     
