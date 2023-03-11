@@ -28,7 +28,7 @@ def run(path_1, path_3, path_5, path_6):
     
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
     
-    list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6]
+    list_tables = [table_1.toPandas(), table_2.toPandas(), table_3.toPandas(), table_5.toPandas(), table_od.toPandas(), table_cc.toPandas(), table_6.toPandas()]
     print(f'All process in {time.time() - t1:.2f}')
     
     return list_tables
