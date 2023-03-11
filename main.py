@@ -14,24 +14,26 @@ path_cc = cfg.data_path['cc']
 path_5 = cfg.data_path['guarantee']
 path_6 = cfg.data_path['exposure']
 
+def path_save(path_in: str) -> str:
+    return path_in.replace('/home/dieule/Desktop/input_test/', 'output/')
 
 if __name__ == "__main__":
     
     t1 = time.time()
 
     #flow_1:
-    table_1, table_2, table_3, table_od, table_cc, table_5, table_6 = flow_1(path_1, path_2, path_3, path_5, path_6)    
+    table_1, table_2, table_3, table_od, table_cc, table_5, table_6 = flow_1(path_1, path_3, path_5, path_6)    
     
-    write_excel(table_1, path_1)
-    write_excel(table_2, path_2)
-    write_excel(table_od, path_od)
-    write_excel(table_cc, path_cc)
+    # write_excel(table_1, replace_save(path_1))
+    # write_excel(table_2, replace_save(path_2))
+    # write_excel(table_od, replace_save(path_od))
+    # write_excel(table_cc, replace_save(path_cc))
 
     #flow_2:
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
     
-    write_excel(table_3, path_3)
-    write_excel(table_5, path_5)
-    write_excel(table_6, path_6)
+    # write_excel(table_3, path_3)
+    # write_excel(table_5, path_5)
+    # write_excel(table_6, path_save(path_6))
 
     print(f'Process in {time.time() - t1:.2f}')

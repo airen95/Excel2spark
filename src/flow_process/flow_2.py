@@ -10,7 +10,10 @@ import pandas as pd
 
 
 # flow 2:
-# 3 cột cuối, 5 cột O, bảng 6 (AU), bảng 5 cột P, bảng 6, bảng 11
+# 3 cột cuối, 5 cột O, bảng 6 (AU), bảng 5 cột P, bảng 6, bảng 11(Cancel)
+
+#modified
+# 3 cột cuối, 6 (AR -> AT), bảng 6 (0), bảng 6 (AU - AY), bảng 5 , 6, bảng 11
 
 def flow_table_3_for_flow2(frame, table_6):
     """Table 3 with last col"""
@@ -18,8 +21,8 @@ def flow_table_3_for_flow2(frame, table_6):
     frame = final_col(frame, table_6)
     return frame
 
-def flow_table_6_for_AR_AU(frame, table_3, table_5):
-    """Table 6 to column AR -> AU"""
+def flow_table_6_for_AR_AT(frame, table_3, table_5):
+    """Table 6 to column AR -> AT"""
     frame = final_adjusted_coll(frame, table_3)
     frame = netting_value_adjusted(frame)
     frame = adjusted_guarantee_maturity(frame, table_5)
@@ -32,20 +35,12 @@ def flow_table_5_for_col_O(frame, table_6):
     
     return frame
 
-def flow_table_6_for_AU_BE(frame):
-    """Table 6 to column AU -> BE"""
-    # frame = final_adjusted_coll(frame, table_3)
-    # frame = netting_value_adjusted(frame)
-    # frame = adjusted_guarantee_maturity(frame, table_5)
-    frame = final_adjusted_guarantee(frame)
+def flow_table_6_for_AU_AY(frame, table_5):
+    frame = final_adjusted_guarantee(frame, table_5)
     frame = ead_before_crm_on_bs(frame)
     frame = ead_before_crm_off_bs(frame)
     frame = ead_after_crm_on_bs(frame)
     frame = ead_after_crm_off_bs(frame)
-    frame = rwa_on_bs(frame)
-    frame = rwa_off_bs(frame)
-    frame = final_cols(frame)
-    
     return frame
 
 def flow_table_5_for_col_P(frame, table_6):
@@ -53,6 +48,14 @@ def flow_table_5_for_col_P(frame, table_6):
     frame = guarantee_rwa(frame, table_6)
     
     return frame
+
+def flow_table_6_for_AZ_BE(frame, table_5):
+    """Table 6 to column AZ -> BE"""
+    frame = rwa_on_bs(frame, table_5)
+    frame = rwa_off_bs(frame)
+    frame = final_cols(frame)    
+    return frame
+
 
 def flow_table_11(table_6):
     # exposure = read_excel(path_exposure)
@@ -77,9 +80,10 @@ def flow_table_11(table_6):
 
 def flow_2(table_3, table_5, table_6):
     table_3 = flow_table_3_for_flow2(table_3, table_6)
-    table_6 = flow_table_6_for_AR_AU(table_6, table_3, table_5)
+    table_6 = flow_table_6_for_AR_AT(table_6, table_3, table_5)
     table_5 = flow_table_5_for_col_O(table_5, table_6)
-    table_6 = flow_table_6_for_AU_BE(table_6)
+    table_6 = flow_table_6_for_AU_AY(table_6, table_5)
     table_5 = flow_table_5_for_col_P(table_5, table_6)
-    on_table, off_table = flow_table_11(table_6)
+    # on_table, off_table = flow_table_11(table_6)
+    on_table, off_table = [], []
     return table_3, table_5, table_6, on_table, off_table

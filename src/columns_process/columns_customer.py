@@ -15,18 +15,19 @@ source = OmegaConf.load('config/source.yaml')
 # =IFERROR(VLOOKUP(B2&C2,$'7. REG TABLE CAL'.B:D,3,0),"Check")
 def cpty_type_cpty_sub_type(frame):
     counterparty_mapping = make_spark_mapping('7. REG TABLE CAL', 'counterparty_mapping')
-    
+    counterparty_mapping = counterparty_mapping.withColumnRenamed('CPTY_TYPE', 'CPTY_TYPE8')\
+                            .withColumnRenamed('CPTY_SUB_TYPE', 'CPTY_SUB_TYPE9')
     frame = frame.withColumn("lookup_value", concat(col("CPTY_TYPE"), col("CPTY_SUB_TYPE")))
 
     key1 = 'lookup_value'
     key2 = 'Concatenated column'
-    cols = ['CPTY_TYPE', 'CPTY_SUB_TYPE']
+    cols = ['CPTY_TYPE8', 'CPTY_SUB_TYPE9']
 
     frame = join_frame(frame, counterparty_mapping, key1, key2, cols)
     
     # Handle errors using the coalesce() function
-    frame = frame.withColumn("CPTY_SUB_TYPE", coalesce(col("CPTY_SUB_TYPE9"), lit("Check")))
-    frame.drop("CPTY_TYPE8", "CPTY_SUB_TYPE9", "CUST_RATING_CD")
+    frame = frame.withColumn("CPTY_SUB_TYPE9", coalesce(col("CPTY_SUB_TYPE9"), lit("Check")))
+    # frame.drop("CPTY_TYPE8", "CPTY_SUB_TYPE9", "CUST_RATING_CD")
     return frame
 
 

@@ -441,10 +441,10 @@ def adjusted_guarantee_maturity(frame, guarantee):
     cols = ['GUARANTEE_ORIGINAL_MATURITY',
     'GUARANTEE_REMAINING_MATURITY',
     'ELIGIBLE_GUARANTEE_FLAG',
-    'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
+    # 'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
     'CURRENCY_OF_GUARANTEE',
-    'GUARANTOR_RW',
-    'GUARANTEE_RWA']
+    'GUARANTOR_RW']
+    # 'GUARANTEE_RWA']
     
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
 
@@ -475,9 +475,12 @@ def adjusted_guarantee_maturity(frame, guarantee):
     frame = frame.fillna({'ADJUSTED_GUARANTEE_MATURITY': 0})
     return frame
 
-def final_adjusted_guarantee(frame):
+def final_adjusted_guarantee(frame, guarantee):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
+    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    cols = ['ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH']
+    frame = join_frame(frame, guarantee, key1, key2, cols)
 
     frame = frame.withColumn('tmp',\
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0)    
@@ -533,7 +536,11 @@ def ead_after_crm_off_bs(frame):
 
     return frame
 
-def rwa_on_bs(frame):
+def rwa_on_bs(frame, guarantee):
+    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    cols = ['GUARANTEE_RWA']
+    frame = join_frame(frame, guarantee, key1, key2, cols)
+
     frame = frame.withColumn('tt', \
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('GUARANTEE_RWA')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0))\
         .withColumn('ttt',\
