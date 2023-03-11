@@ -2,6 +2,8 @@ output/*
 *ipynb
 *crc
 *xlsx
+*xlsb
 *pyc
 src/*/*pyc
 ipynb_checkpoints
+input_test

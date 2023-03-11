@@ -16,7 +16,7 @@ source = OmegaConf.load('config/source.yaml')
 def cpty_type_cpty_sub_type(frame):
     counterparty_mapping = make_spark_mapping('7. REG TABLE CAL', 'counterparty_mapping')
     
-    frame = frame.withColumn("lookup_value", concat(col("CPTY_TYPE1"), col("CPTY_SUB_TYPE2")))
+    frame = frame.withColumn("lookup_value", concat(col("CPTY_TYPE"), col("CPTY_SUB_TYPE")))
 
     key1 = 'lookup_value'
     key2 = 'Concatenated column'
