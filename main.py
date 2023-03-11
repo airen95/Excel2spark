@@ -20,7 +20,7 @@ path_6 = cfg.data_path['exposure']
 
 
 def path_save(path_in: str) -> str:
-    return path_in.replace(cfg.data_path.path, cfg.path_save).replace(".xlsx", ".csv")
+    return path_in.replace(cfg.data_path.path, cfg.path_save).replace(".xlsx", "")
 
 def run(path_1, path_3, path_5, path_6):
     t1 = time.time()
@@ -28,7 +28,7 @@ def run(path_1, path_3, path_5, path_6):
     
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
     
-    list_tables = [table_1.toPandas(), table_2.toPandas(), table_3.toPandas(), table_5.toPandas(), table_od.toPandas(), table_cc.toPandas(), table_6.toPandas()]
+    list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6]
     print(f'All process in {time.time() - t1:.2f}')
     
     return list_tables
@@ -39,12 +39,13 @@ if __name__ == "__main__":
     
     list_tables = run(path_1, path_3, path_5, path_6)
   
-    # write_excel(table_1, path_save(path_1))
-    # write_excel(table_2, path_save(path_2))
-    # write_excel(table_od, path_save(path_od))
-    # write_excel(table_cc, path_save(path_cc))
-    # write_excel(table_3, path_save(path_3))
-    # write_excel(table_5, path_save(path_5))
-    # write_excel(table_6, path_save(path_6))
+
+    write_excel(list_tables[0], path_save(path_1))
+    write_excel(list_tables[1], path_save(path_2))
+    write_excel(list_tables[2], path_save(path_od))
+    write_excel(list_tables[3], path_save(path_cc))
+    write_excel(list_tables[4], path_save(path_3))
+    write_excel(list_tables[5], path_save(path_5))
+    write_excel(list_tables[6], path_save(path_6))
 
     

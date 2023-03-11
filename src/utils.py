@@ -142,15 +142,15 @@ def vlookup(vlookup_dct, alternative):
 def write_excel(frame, path_save: str):
     t1 = time.time()
      
-    # frame.write\
-    #   .format("csv")\
-    #   .mode("overwrite")\
-    #   .option("header", "true")\
-    #   .save(path_save)
+    frame.write\
+      .format("csv")\
+      .mode("overwrite")\
+      .option("header", "true")\
+      .save(path_save)
       
-    f_pandas = frame.toPandas()
-    print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
-    f_pandas.to_csv(path_save, index=False)
+    # f_pandas = frame.toPandas()
+    # print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
+    # f_pandas.to_csv(path_save, index=False)
     print(f'Save csv file in {time.time() - t1:.2f}')
     
 
