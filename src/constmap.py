@@ -55,6 +55,11 @@ config = {
             'schema': [StructField("HAIRCUT_CD", StringType(), True)\
                        ,StructField("HAIRCUT%", StringType(), True)\
                        ]           
+        },
+        'COLL MATURITY BUCKETS': {'index': [7, 19, 22],
+            'schema': [StructField("MIN_MATURITY", StringType(), True)\
+                       ,StructField("MAX_MATURITY", StringType(), True),StructField("MATURITY_BUCKET", StringType(), True)  
+                       ]          
         }
     },
     '7. REG TABLE CAL': {

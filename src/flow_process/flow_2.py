@@ -12,43 +12,51 @@ import pandas as pd
 # flow 2:
 # 3 cột cuối, 5 cột O, bảng 6 (AU), bảng 5 cột P, bảng 6, bảng 11
 
-def flow_table_3_for_flow2(path):
+def flow_table_3_for_flow2(frame, table_6):
     """Table 3 with last col"""
     # frame = read_excel(path)
-    frame = final_col(frame)
+    frame = final_col(frame, table_6)
     return frame
 
+def flow_table_6_for_AR_AU(frame, table_3, table_5):
+    """Table 6 to column AR -> AU"""
+    frame = final_adjusted_coll(frame, table_3)
+    frame = netting_value_adjusted(frame)
+    frame = adjusted_guarantee_maturity(frame, table_5)
+    return frame
 
-def flow_table_5_for_col_O(frame):
-    """Table 5 with last 2 cols"""
-    frame = allocate_guarantee(frame)
+def flow_table_5_for_col_O(frame, table_6):
+    """Table 5 for col 0"""
+    frame = allocate_guarantee(frame, table_6)
     # frame = guarantee_rwa(frame)
     
-    return frame, 
+    return frame
 
-def flow_table_6_for_flow2(frame):
-    """Table 6 to column AU"""
+def flow_table_6_for_AU_BE(frame):
+    """Table 6 to column AU -> BE"""
+    # frame = final_adjusted_coll(frame, table_3)
+    # frame = netting_value_adjusted(frame)
+    # frame = adjusted_guarantee_maturity(frame, table_5)
+    frame = final_adjusted_guarantee(frame)
+    frame = ead_before_crm_on_bs(frame)
+    frame = ead_before_crm_off_bs(frame)
+    frame = ead_after_crm_on_bs(frame)
+    frame = ead_after_crm_off_bs(frame)
+    frame = rwa_on_bs(frame)
+    frame = rwa_off_bs(frame)
+    frame = final_cols(frame)
     
-    exposure = final_adjusted_guarantee(frame)
-    exposure = ead_before_crm_on_bs(exposure)
-    exposure = ead_before_crm_off_bs(exposure)
-    exposure = ead_after_crm_on_bs(exposure)
-    exposure = ead_after_crm_off_bs(exposure)
-    exposure = rwa_on_bs(exposure)
-    exposure = rwa_off_bs(exposure)
-    exposure = final_cols(exposure)
-    
-    return exposure
+    return frame
 
-def flow_table_5_for_col_P(frame):
-    """Table 5 with last 2 cols"""
-    frame = guarantee_rwa(frame)
+def flow_table_5_for_col_P(frame, table_6):
+    """Table 5 for col P"""
+    frame = guarantee_rwa(frame, table_6)
     
-    return frame,
+    return frame
 
 def flow_table_11(table_6):
     # exposure = read_excel(path_exposure)
-    on, off = table_output(exposure)
+    on, off = table_output(table_6)
 
     on_table = pd.DataFrame()
     off_table = pd.DataFrame()
@@ -68,10 +76,10 @@ def flow_table_11(table_6):
     return on_table, off_table
 
 def flow_2(table_3, table_5, table_6):
-    table_3 = flow_table_3_for_flow2(table_3)
-    table_5 = flow_table_5_for_col_O(table_5)
-    table_6 = flow_table_6_for_flow2(table_6)
-    table_5 = flow_table_5_for_col_P(table_5)
+    table_3 = flow_table_3_for_flow2(table_3, table_6)
+    table_6 = flow_table_6_for_AR_AU(table_6, table_3, table_5)
+    table_5 = flow_table_5_for_col_O(table_5, table_6)
+    table_6 = flow_table_6_for_AU_BE(table_6)
+    table_5 = flow_table_5_for_col_P(table_5, table_6)
     on_table, off_table = flow_table_11(table_6)
-
     return table_3, table_5, table_6, on_table, off_table

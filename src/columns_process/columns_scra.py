@@ -7,8 +7,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
-from .constmap import *
+from src.utils import *
+from src.constmap import *
 
 source = OmegaConf.load('config/source.yaml')
 

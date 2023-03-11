@@ -7,8 +7,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
-from .constmap import *
+from src.utils import *
+from src.constmap import *
 
 source = OmegaConf.load('config/source.yaml')
 
@@ -43,7 +43,7 @@ def ori_mature_remain_mature_crm_eligible(frame):
     
     return frame
 
-def allocate_guarantee(frame):
+def allocate_guarantee(frame, exposure):
     """
     Table 6 first
     =SUMIFS($'6. EXPOSURE'.AT:AT,$'6. EXPOSURE'.B:B,$'5. GUARANTEE'.B2,$'6. EXPOSURE'.AO:AO,">="&K2)*N2
@@ -51,7 +51,7 @@ def allocate_guarantee(frame):
     =SUMIFS($'6. EXPOSURE'.AU:AU,$'6. EXPOSURE'.B:B,$'5. GUARANTEE'.B2,$'6. EXPOSURE'.AO:AO,">="&K2)*N2*K2
     """
     # Must read processed table 6***********
-    exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
+    # exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
 
     key1="CUSTOMER_ID"
     key2="CUSTOMER_ID"
@@ -68,7 +68,7 @@ def allocate_guarantee(frame):
              
     return frame
 
-def guarantee_rwa(frame):
+def guarantee_rwa(frame, exposure):
     """
     Table 6 first
     =SUMIFS($'6. EXPOSURE'.AT:AT,$'6. EXPOSURE'.B:B,$'5. GUARANTEE'.B2,$'6. EXPOSURE'.AO:AO,">="&K2)*N2
@@ -76,7 +76,7 @@ def guarantee_rwa(frame):
     =SUMIFS($'6. EXPOSURE'.AU:AU,$'6. EXPOSURE'.B:B,$'5. GUARANTEE'.B2,$'6. EXPOSURE'.AO:AO,">="&K2)*N2*K2
     """
     # Must read processed table 6***********
-    exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
+    # exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
 
     key1="CUSTOMER_ID"
     key2="CUSTOMER_ID"

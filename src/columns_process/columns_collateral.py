@@ -7,8 +7,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
-from .utils import *
-from .constmap import *
+from src.utils import *
+from src.constmap import *
 
 source = OmegaConf.load('config/source.yaml')
 
@@ -79,7 +79,7 @@ def haircut_cd(frame):
         when(col('COLL_TYPE').isin(lst), concat_col()(struct([col(x) for x in concat_cols]))).otherwise(concat_col()(struct([col(x) for x in concat_cols[:3]])))
         )
 
-    frame =  frame.join(haircut_mapping, t['concat'] == haircut_mapping['Concatenated column'], how = 'left').select(t['*'], haircut_mapping['HAIRCUT_CD'].alias('tmp'))
+    frame =  frame.join(haircut_mapping, frame['concat'] == haircut_mapping['Concatenated column'], how = 'left').select(frame['*'], haircut_mapping['HAIRCUT_CD'].alias('tmp'))
     frame =  frame.fillna({'tmp': 'N/A'})
 
     frame =  frame.withColumn('HAIRCUT_CD',\
@@ -122,10 +122,10 @@ def crm_eligible(frame):
     
     return frame
 
-def final_col(frame):
+def final_col(frame, exposure):
     """=SUMIFS($'6. EXPOSURE'.AQ:AQ,$'6. EXPOSURE'.B:B,$'3. COLLATERAL'.B2)*$'3. COLLATERAL'.U2*(1-T2)
     """
-    exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
+    # exposure = read_excel('/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx')
     
     key1="CUSTOMER_ID"
     key2="CUSTOMER_ID"

@@ -4,7 +4,10 @@ from pyspark.sql import SparkSession
 import pandas as pd
 from .constmap import *
 from typing import Tuple
+from omegaconf import OmegaConf
 
+
+source = OmegaConf.load('config/source.yaml')
 spark = SparkSession.builder.config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2").getOrCreate()
 
 def replace_null(c, alternate):
@@ -24,7 +27,7 @@ def is_error(c):
 is_error = udf(is_error, IntegerType())
 
 def make_spark_mapping(sheet_name: str, table_name: str):
-    tmp = pd.read_excel('/home/dieule/Downloads/input_test/PARAMETER.xlsx', sheet_name = sheet_name)
+    tmp = pd.read_excel(source.data_path['parameter'], sheet_name = sheet_name)
     [r1, c1, c2] = config[sheet_name][table_name]['index']
     schema = config[sheet_name][table_name]['schema']
     tmp = tmp.iloc[r1:, c1:c2].reset_index(drop='True')
@@ -33,7 +36,7 @@ def make_spark_mapping(sheet_name: str, table_name: str):
     return tmp
 
 def make_spark_mapping_SCRA(sheet_name: str, table_name: str):
-    tmp = pd.read_excel('/content/drive/MyDrive/Excel2spark/input_test/SCRA.xlsx', sheet_name = sheet_name)
+    tmp = pd.read_excel(source.data_path['scra'], sheet_name = sheet_name)
     [r1, c1, c2] = config[sheet_name][table_name]['index']
     schema = config[sheet_name][table_name]['schema']
     tmp = tmp.iloc[r1:, c1:c2].reset_index(drop='True')
