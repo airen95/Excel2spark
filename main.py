@@ -28,13 +28,16 @@ def run(path_1, path_3, path_5, path_6):
     
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
     
-    return table_1, table_2, table_3, table_5, table_od, table_cc, table_6
-
+    list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6]
     print(f'All process in {time.time() - t1:.2f}')
+    
+    return list_tables
+
+    
 
 if __name__ == "__main__":
     
-    table_1, table_2, table_3, table_5, table_od, table_cc, table_6 = run(path_1, path_3, path_5, path_6)
+    list_tables = run(path_1, path_3, path_5, path_6)
   
     # write_excel(table_1, path_save(path_1))
     # write_excel(table_2, path_save(path_2))
