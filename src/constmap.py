@@ -9,7 +9,8 @@ scra_columns = {'A': 'CUSTOMER_ID',
  'F':"5. Does the counterparty bank has material default risks and limited margins of safety. For e.g., are these counterparties have adverse business, financial, or economic conditions that are very likely to lead, or have led, to an inability to meet their financial commitments? (Y/N)",
  'G':"6. Does the counterparty bank does not meet the criteria for being classifed as Grade B with respect to its published minimum regulatory requirements? (Y/N)",
  'H':"7. Does the external auditor has issued an adverse audit opinion or has expressed substantial doubt about the counterparty bank’s ability to continue as a going concern in its financial statements or audited reports within the previous 12 months? (Y/N)",
- 'I':"#. Does the bank have a CET1 ratio which meets or exceeds 14% and a Tier 1 leverage ratio which meets or exceeds 5%?"}
+ 'I':"#. Does the bank have a CET1 ratio which meets or exceeds 14% and a Tier 1 leverage ratio which meets or exceeds 5%?",
+ 'scra_group':'SCRA Group'}
 
 
 config = {

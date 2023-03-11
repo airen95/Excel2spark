@@ -7,6 +7,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from omegaconf import OmegaConf
 
+from src.constmap import scra_columns
 from src.utils import *
 
 source = OmegaConf.load('config/source.yaml')
@@ -31,7 +32,7 @@ def cpty_type_cpty_sub_type(frame):
     return frame
 
 
-def cust_rating_cd(frame):
+def cust_rating_cd(frame, table_2):
     """
     if IF(AND(E2&D2<>"NANA",E2&D2<>""),
         VLOOKUP(E2&D2,'7. REG TABLE CAL'!N:O,2,0),
@@ -49,15 +50,15 @@ def cust_rating_cd(frame):
     
     ###
     # scra = pd.read_excel('/home/dieule/Downloads/input_test/SCRA.xlsx', header = 1)
-    scra_dct = make_lookup(table_2, 'Concatenated column', 'SCRA Group')
+    scra_dct = make_lookup(table_2, 'CUSTOMER_ID', scra_columns['scra_group'])
 
     ###
-    
+    print(frame.columns)
     frame = frame.withColumn('e2d2', concat(col('RATING_AGENCY_CODE'), col('CUSTOMER_RATING')))\
         .withColumn('CUST_RATING_CD',\
         when(~col('e2d2').isin('', 'NANA'), vlookup(rating_dct, 'NA')(col('e2d2'))).otherwise(\
-            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE1')!='FIN_INST'), 'LT7').otherwise(\
-            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE1')=='FIN_INST'), vlookup(scra_dct, 'NA')(col('CUSTOMER_ID'))).otherwise('NA') 
+            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE')!='FIN_INST'), 'LT7').otherwise(\
+            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE')=='FIN_INST'), vlookup(scra_dct, 'NA')(col('CUSTOMER_ID'))).otherwise('NA') 
                 )
         )).drop('e2d2')
 

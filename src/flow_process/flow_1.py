@@ -10,12 +10,13 @@ from src.flow_process.flow_2 import *
 
 
 #flow 1
-# 1, 2, 4, OD, CC, 3(bỏ cột cuối) ,5 ( bỏ 2 cuối) , 6 (AT)
+# 2, 1, 4, OD, CC, 3(bỏ cột cuối) ,5 ( bỏ 2 cuối) , 6 (AT)
 
-def flow_table_1(path: str):
+def flow_table_1(path: str, table_2):
     """Table 1"""
     frame = read_excel(path)
     frame = cpty_type_cpty_sub_type(frame)
+    frame = cust_rating_cd(frame, table_2)
     # write_excel(frame, path)   
     return frame
 
@@ -81,7 +82,7 @@ def flow_table_6_for_flow1(path_exposure: str, table_1, table_3, table_5, table_
     exposure = prd_cd_prd_sub_cd(exposure)
     exposure = asset_class_asset_sub_class(exposure)
     exposure = specific_provision_bucket(exposure)
-    exposure = cust_rating(exposure)
+    exposure = cust_rating(exposure, table_1)
     exposure = exposure_percent(exposure)
     exposure = ltv(exposure, table_3)
     exposure = ltv_bucket(exposure)
@@ -108,8 +109,8 @@ def flow_table_6_for_flow1(path_exposure: str, table_1, table_3, table_5, table_
     return exposure
 
 def flow_1(path_1, path_3, path_5, path_exposure):
-    table_1 = flow_table_1(path_1)
     table_2 = flow_table_2()
+    table_1 = flow_table_1(path_1, table_2)
     table_od = flow_od()
     table_cc = flow_cc()
     table_3 = flow_table_3_for_flow1(path_3)

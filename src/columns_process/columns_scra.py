@@ -15,7 +15,7 @@ source = OmegaConf.load('config/source.yaml')
 # =IF(OR(B3="",C3="",D3="",E3="",F3="",G3="",H3="",I3=""),"INVALID",IF( AND(B3="Y",C3="Y",I3="Y"),"Group A and satisfy #",IF(AND(B3="Y",C3="Y"),"Group A",IF(E3="Y","Group B","Group C"))))
 
 def scra_group(frame):
-    frame = frame.withColumn("result", when(
+    frame = frame.withColumn("SCRA Group", when(
         (col("`{}`".format(scra_columns['B'])) == "") | (col("`{}`".format(scra_columns['C'])) == "") | 
         (col("`{}`".format(scra_columns['D'])) == "") | (col("`{}`".format(scra_columns['E'])) == "") |
         (col("`{}`".format(scra_columns['F'])) == "") | (col("`{}`".format(scra_columns['G'])) == "") |

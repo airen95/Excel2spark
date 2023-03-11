@@ -195,7 +195,7 @@ def specific_provision_bucket(frame):
         ))
     return frame
 
-def cust_rating(frame):
+def cust_rating(frame, customer):
     rating_table_mapping = make_spark_mapping('7. REG TABLE CAL', 'RATING TABLE MAPPING')
     frame = frame.withColumn('tmp2',\
         when(col('ASSET_SUB_CLASS') == 'COVERED BOND RATED',\
@@ -209,7 +209,7 @@ def cust_rating(frame):
             rating_table_mapping['RATING_CD'].alias('CUST_RATING1'))
     frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))
 
-    customer = read_excel('/home/dieule/Downloads/input_test/CUSTOMER.xlsx')
+    # customer = read_excel(source.data_path['customer'])
     frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['tmp2'] != "COVERED BOND RATED"), how = 'left')\
         .select(frame['*'], customer['CUST_RATING_CD'].alias('CUST_RATING2'))
 

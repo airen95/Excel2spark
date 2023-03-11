@@ -7,3 +7,4 @@ output/*
 src/*/*pyc
 ipynb_checkpoints
 input_test
+config/source.yaml

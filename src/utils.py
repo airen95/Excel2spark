@@ -1,6 +1,7 @@
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
+import time
 import pandas as pd
 from .constmap import *
 from typing import Tuple
@@ -138,14 +139,19 @@ def vlookup(vlookup_dct, alternative):
     return udf(ff)
 
 
-def write_excel(frame, path_save: str): 
-    frame.write\
-      .format("com.crealytics.spark.excel")\
-      .option("header", "true")\
-      .save(path_save)
+def write_excel(frame, path_save: str):
+    t1 = time.time()
+     
+    # frame.write\
+    #   .format("csv")\
+    #   .mode("overwrite")\
+    #   .option("header", "true")\
+    #   .save(path_save)
       
-    # f_pandas = frame.toPandas()
-    # f_pandas.to_excel('./output/customer.xlsx', index=False)
+    f_pandas = frame.toPandas()
+    print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
+    f_pandas.to_csv(path_save, index=False)
+    print(f'Save csv file in {time.time() - t1:.2f}')
     
 
 def check_numeric(value: Tuple[int, float]):
