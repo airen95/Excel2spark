@@ -27,8 +27,8 @@ def cpty_type_cpty_sub_type(frame):
     frame = join_frame(frame, counterparty_mapping, key1, key2, cols)
     
     # Handle errors using the coalesce() function
-    frame = frame.withColumn("CPTY_SUB_TYPE9", coalesce(col("CPTY_SUB_TYPE9"), lit("Check")))
-    # frame.drop("CPTY_TYPE8", "CPTY_SUB_TYPE9", "CUST_RATING_CD")
+    frame = frame.withColumn("CPTY_SUB_TYPE9", coalesce(col("CPTY_SUB_TYPE9"), lit("Check"))).drop("lookup_value")
+    
     return frame
 
 
@@ -47,19 +47,17 @@ def cust_rating_cd(frame, table_2):
     rating_mapping = make_spark_mapping('7. REG TABLE CAL', 'RATING TABLE MAPPING')
     rating_mapping = rating_mapping.where(col( 'Concatenated column')!='NaN')
     rating_dct = make_lookup(rating_mapping, 'Concatenated column', 'RATING_CD')
+    rating_dct['STD_POORAAA'] = 'LT1'
     
-    ###
-    # scra = pd.read_excel('/home/dieule/Downloads/input_test/SCRA.xlsx', header = 1)
-    scra_dct = make_lookup(table_2, 'CUSTOMER_ID', scra_columns['scra_group'])
-
-    ###
-    print(frame.columns)
+    scra_dct = make_lookup(table_2, 'CUSTOMER_ID', 'SCRA Group')
+    
     frame = frame.withColumn('e2d2', concat(col('RATING_AGENCY_CODE'), col('CUSTOMER_RATING')))\
         .withColumn('CUST_RATING_CD',\
-        when(~col('e2d2').isin('', 'NANA'), vlookup(rating_dct, 'NA')(col('e2d2'))).otherwise(\
-            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE')!='FIN_INST'), 'LT7').otherwise(\
-            when((col('e2d2').isin('', 'NANA')) & (col('CPTY_TYPE')=='FIN_INST'), vlookup(scra_dct, 'NA')(col('CUSTOMER_ID'))).otherwise('NA') 
-                )
-        )).drop('e2d2')
-
+            when((~col('e2d2').isNull()) & (~col('e2d2').isin('NANA', '')), vlookup(rating_dct, 'NA')(col('e2d2'))   
+            ).otherwise(when(col('CPTY_TYPE')!='FIN_INST', 'LT7').otherwise(vlookup(scra_dct, 'NA')(col('CUSTOMER_ID'))))
+            
+            ).drop('e2d2')
+        
+    frame = frame.where(~col('CUSTOMER_ID').isNull())
+    
     return frame

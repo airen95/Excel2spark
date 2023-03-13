@@ -570,8 +570,8 @@ def transactor_flag_od():
     cols1 = frame.columns[4:15]
     cols2 = frame.columns[3:14]
 
-    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:-1]]))\
-    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:-1]]))\
+    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:15]]))\
+    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:15]]))\
     .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
     .withColumn('Transactor flag',\
         when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))

@@ -9,8 +9,14 @@ from omegaconf import OmegaConf
 
 
 source = OmegaConf.load('config/source.yaml')
-spark = SparkSession.builder.config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2").getOrCreate()
-
+spark = SparkSession.builder\
+    .config('spark.sql.debug.maxToStringFields', 2000)\
+    .config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2")\
+    .config("spark.driver.memory","4g")\
+    .config("spark.executor.memory", '1g')\
+    .getOrCreate()
+    
+    
 def replace_null(c, alternate):
     if not c:
         return alternate

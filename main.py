@@ -42,10 +42,8 @@ if __name__ == "__main__":
 
     write_excel(list_tables[0], path_save(path_1))
     write_excel(list_tables[1], path_save(path_2))
-    write_excel(list_tables[2], path_save(path_od))
-    write_excel(list_tables[3], path_save(path_cc))
-    write_excel(list_tables[4], path_save(path_3))
-    write_excel(list_tables[5], path_save(path_5))
+    write_excel(list_tables[4], path_save(path_od))
+    write_excel(list_tables[5], path_save(path_cc))
+    write_excel(list_tables[2], path_save(path_3))
+    write_excel(list_tables[3], path_save(path_5))
     write_excel(list_tables[6], path_save(path_6))
-
-    
