@@ -27,12 +27,12 @@ def residual_maturity(frame):
 
 
 
-def cpty_type_cpty_sub_type_borrower_income_source_curr(frame, customer):
-    # customer = read_excel(source.data_path['customer'])
+def cpty_type_cpty_sub_type_borrower_income_source_curr(frame):
+    customer = read_excel(source.data_path['customer'])
 
     key1 = 'CUSTOMER_ID'
     key2 = key1
-    cols = ['BORROWER_INCOME_SOURCE_CURR', 'CPTY_TYPE8', 'CPTY_SUB_TYPE9']
+    cols = ['BORROWER_INCOME_SOURCE_CURR', 'CPTY_TYPE8', 'CPTY_SUB_TYPE9', ]
 
     frame = join_frame(frame, customer, key1, key2, cols)
 
@@ -76,9 +76,9 @@ def reg_retail_8b_flag(frame):
 
 
 
-def transactor_flag(frame, od, cc):
-    # od = read_excel(source.data_path['od'])
-    # cc  = read_excel(source.data_path['cc'])
+def transactor_flag(frame):
+    od = read_excel(source.data_path['od'])
+    cc  = read_excel(source.data_path['cc'])
 
     frame = frame.join(od, frame.EXPOSURE_ID == od['Số TK vay'], how = 'left').select(frame['*'], od['Transactor flag'].alias('flag1'))
     frame = frame.join(cc, frame.EXPOSURE_ID == cc['Số TK'], how = 'left').select(frame['*'], cc['Transactor flag'].alias('flag2'))
@@ -200,7 +200,7 @@ def specific_provision_bucket(frame):
         ))
     return frame
 
-def cust_rating(frame, customer):
+def cust_rating(frame):
     rating_table_mapping = make_spark_mapping('7. REG TABLE CAL', 'RATING TABLE MAPPING')
     frame = frame.withColumn('tmp2',\
         when(col('ASSET_SUB_CLASS') == 'COVERED BOND RATED',\
@@ -214,7 +214,7 @@ def cust_rating(frame, customer):
             rating_table_mapping['RATING_CD'].alias('CUST_RATING1'))
     frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))
 
-    # customer = read_excel(source.data_path['customer'])
+    customer = read_excel(source.data_path['customer'])
     frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['tmp2'] != "COVERED BOND RATED"), how = 'left')\
         .select(frame['*'], customer['CUST_RATING_CD'].alias('CUST_RATING2'))
 
@@ -235,11 +235,11 @@ def exposure_percent(frame):
     frame = frame.withColumn('EXPOSURE %', when(col('EXPOSURE %').isNull(), 0).otherwise(col('EXPOSURE %'))).drop('sum1', 'groupH', 'groupI', 'groupJ')
     return frame
 
-def ltv(frame, collateral):
-    # collateral = read_excel(source.data_path['collateral'])
+def ltv(frame):
+    collateral = read_excel(source.data_path['collateral'])
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['COLL_TYPE','COLL_CCY', 'ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY']#,\
-        # 'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    cols = ['COLL_TYPE','ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY',\
+        'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
 
     frame = join_frame(frame, collateral, key1, key2, cols)
     condition = ["CRE_GEN","CRE_INC","RRE_GEN","RRE_INC"]
@@ -419,13 +419,13 @@ def adjusted_coll_maturity(frame):
     # frame = frame.fillna({'ADJUSTED_COLL_MATURITY': 0})
     return frame
 
-def final_adjusted_coll(frame, collateral):
+def final_adjusted_coll(frame):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
 
-    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
-    frame = join_frame(frame, collateral, key1, key2, cols)
+    # key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    # cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    # frame = join_frame(frame, collateral, key1, key2, cols)
     # frame = frame.joim()
 
     frame = frame.fillna( {'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT':0, 'COLL_CCY': 'N/A'})
@@ -452,15 +452,15 @@ def netting_value_adjusted(frame):
             when(col('NETTING_VALUE_ADJUSTED').isNull(), 'CHECK ERROR').otherwise(col('NETTING_VALUE_ADJUSTED'))).drop('NETTING_EXPOSURE_VALUE')
     return frame
 
-def adjusted_guarantee_maturity(frame, guarantee):
-    # guarantee = read_excel(source.data_path['guarantee'])
+def adjusted_guarantee_maturity(frame):
+    guarantee = read_excel(source.data_path['guarantee'])
     cols = ['GUARANTEE_ORIGINAL_MATURITY',
     'GUARANTEE_REMAINING_MATURITY',
     'ELIGIBLE_GUARANTEE_FLAG',
-    # 'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
+    'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
     'CURRENCY_OF_GUARANTEE',
-    'GUARANTOR_RW']
-    # 'GUARANTEE_RWA']
+    'GUARANTOR_RW',
+    'GUARANTEE_RWA']
     
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
 
@@ -491,12 +491,12 @@ def adjusted_guarantee_maturity(frame, guarantee):
     frame = frame.fillna({'ADJUSTED_GUARANTEE_MATURITY': 0})
     return frame
 
-def final_adjusted_guarantee(frame, guarantee):
+def final_adjusted_guarantee(frame):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
-    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH']
-    frame = join_frame(frame, guarantee, key1, key2, cols)
+    # key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    # cols = ['ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH']
+    # frame = join_frame(frame, guarantee, key1, key2, cols)
 
     frame = frame.withColumn('tmp',\
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0)    
@@ -552,10 +552,10 @@ def ead_after_crm_off_bs(frame):
 
     return frame
 
-def rwa_on_bs(frame, guarantee):
+def rwa_on_bs(frame):
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['GUARANTEE_RWA']
-    frame = join_frame(frame, guarantee, key1, key2, cols)
+    # cols = ['GUARANTEE_RWA']
+    # frame = join_frame(frame, guarantee, key1, key2, cols)
 
     frame = frame.withColumn('tt', \
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('GUARANTEE_RWA')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0))\
@@ -575,48 +575,4 @@ def final_cols(frame):
         .withColumn('RWA_ON_BS Without CRM', col('EAD BEFORE CRM (ON-BS)')* col('RW_CC'))\
         .withColumn('RWA_OFF_BS Without CRM', col('EAD BEFORE CRM (OFF-BS)')*col('RW_CC'))\
             .withColumn('TOTAL_RWA Without CRM', col('RWA_OFF_BS Without CRM') + col('RWA_ON_BS Without CRM'))
-    return frame
-
-
-
-############################33
-def transactor_flag_od():
-    frame = read_excel(source.data_path['od'])
-    frame = frame.where(~col('Mã KH').isNull())
-
-
-    cols1 = frame.columns[4:15]
-    cols2 = frame.columns[3:14]
-
-    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
-    .withColumn('Transactor flag',\
-        when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))
-        ).drop('numeric_count', 'check_zero', 'check_if')
-
-    return frame
-
-def transactor_flag_cc():
-    frame = read_excel(source.data_path['cc'])
-
-    cols1 = frame.columns[4:16]
-    cols2 = frame.columns[17:29]
-
-    cols4 = frame.columns[18:30]
-    cols3 = frame.columns[5:17]
-
-    frame = frame.withColumn('count1',\
-        reduce(add, [check_numeric(col(x)) for x in cols1]) + reduce(add, [check_numeric(col(x)) for x in cols2]))\
-        .withColumn('minus1', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols1, cols2)]))\
-        .withColumn('count2',\
-        reduce(add, [check_numeric(col(x)) for x in cols3]) + reduce(add, [check_numeric(col(x)) for x in cols4]))\
-        .withColumn('minus2', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols3, cols4)]))\
-        .withColumn('Transactor flag',\
-        when(col('Tag_trano').isin('M', 'JCB'),\
-            when((col('count1') == 24) & (col('minus1') == 0), 'Y').otherwise('N')
-            ).otherwise(\
-                when((col('count2') == 24) & (col('minus2') == 0), 'Y').otherwise('N')
-                )).drop('count1', 'count2', 'minus1', 'minus2')
-
     return frame

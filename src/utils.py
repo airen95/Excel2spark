@@ -9,7 +9,13 @@ from omegaconf import OmegaConf
 
 
 source = OmegaConf.load('config/source.yaml')
-spark = SparkSession.builder.config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2").getOrCreate()
+spark = SparkSession.builder\
+    .config('spark.sql.debug.maxToStringFields', 2000)\
+    .config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2")\
+    .config("spark.driver.memory","2g").getOrCreate()
+
+    # .config("spark.executor.memory", '2g')\
+sc = spark.sparkContext
 
 def replace_null(c, alternate):
     if not c:
@@ -51,7 +57,7 @@ def read_excel(path, sheet_name: str = None):
             .option("header", "true") \
             .option("treatEmptyValuesAsNulls", "true") \
             .option("dataAddress", f"\'{sheet_name}\'!A1") \
-            .option("maxRowsInMemory", 2000)\
+            .option("maxRowsInMemory", 1000)\
             .option("maxByteArraySize", 2147483647)\
             .option("inferSchema", "true") \
             .load(path)
@@ -143,15 +149,14 @@ def write_excel(frame, path_save: str):
     t1 = time.time()
      
     frame.write\
-      .format("csv")\
-      .mode("overwrite")\
+      .format("com.crealytics.spark.excel")\
       .option("header", "true")\
       .save(path_save)
       
     # f_pandas = frame.toPandas()
     # print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
     # f_pandas.to_csv(path_save, index=False)
-    print(f'Save csv file in {time.time() - t1:.2f}')
+    # print(f'Save csv file in {time.time() - t1:.2f}')
     
 
 def check_numeric(value: Tuple[int, float]):

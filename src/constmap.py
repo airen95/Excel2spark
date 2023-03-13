@@ -64,43 +64,43 @@ config = {
         }
     },
     '7. REG TABLE CAL': {
-        'RATING TABLE MAPPING' : {'index': [9, 13, 15],\
+        'RATING TABLE MAPPING' : {'index': [8, 13, 15],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("RATING_CD", StringType(), True)
                        ]
 
         },
-        'CCF MAPPING': {'index': [9, 16, 18],\
+        'CCF MAPPING': {'index': [8, 16, 18],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("CCF_CD", StringType(), True)
                        ]            
 
         },
-        'assess_mapping': {'index': [9, 22, 25],\
+        'assess_mapping': {'index': [8, 22, 25],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("ASSET_CLASS", StringType(), True)\
                        ,StructField("ASSET_SUB_CLASS", StringType(), True)\
                        ]
         },
-        'product_mapping': {'index': [9, 5, 8],\
+        'product_mapping': {'index': [8, 5, 8],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("PRODUCT_TYPE", StringType(), True)\
                        ,StructField("PRODUCT_SUB_TYPE", StringType(), True)\
                        ]
         },
-        'haircut': {'index': [9, 19, 21],\
+        'haircut': {'index': [8, 19, 21],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("HAIRCUT_CD", StringType(), True)
                        ]          
 
         },
-        'counterparty_mapping': {'index': [9, 1, 4],\
+        'counterparty_mapping': {'index': [8, 1, 4],\
             'schema': [StructField("Concatenated column", StringType(), True)\
                        ,StructField("CPTY_TYPE", StringType(), True)\
                        ,StructField("CPTY_SUB_TYPE", StringType(), True)\
                        ]
         },
-        'collateral_mapping': {'index': [9, 9, 12],\
+        'collateral_mapping': {'index': [8, 9, 12],\
             'schema': [StructField("COLL_TYPE", StringType(), True)\
                        ,StructField("CRM_CD", StringType(), True)\
                        ,StructField("ELIGIBLE_CRM", StringType(), True)\

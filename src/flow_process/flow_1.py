@@ -15,6 +15,7 @@ from src.flow_process.flow_2 import *
 def flow_table_1(path: str, table_2):
     """Table 1"""
     frame = read_excel(path)
+    frame = frame.where(~col('CUSTOMER_ID').isNull())
     frame = cpty_type_cpty_sub_type(frame)
     frame = cust_rating_cd(frame, table_2)
     # write_excel(frame, path)   
@@ -95,7 +96,6 @@ def flow_table_6_for_flow1(path_exposure: str, table_1, table_3, table_5, table_
     # exposure = final_adjusted_coll(exposure, table_3)
     # exposure = netting_value_adjusted(exposure)
     # exposure = adjusted_guarantee_maturity(exposure, table_5)
-    # write_excel(frame, path_exposure)
    
     # exposure = final_adjusted_guarantee(exposure)
     # exposure = ead_before_crm_on_bs(exposure)
