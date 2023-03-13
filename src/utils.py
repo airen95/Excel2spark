@@ -16,7 +16,7 @@ spark = SparkSession.builder\
     .config("spark.executor.memory", '1g')\
     .getOrCreate()
     
-    
+# sc = spark.sparkContext
 def replace_null(c, alternate):
     if not c:
         return alternate
@@ -57,7 +57,7 @@ def read_excel(path, sheet_name: str = None):
             .option("header", "true") \
             .option("treatEmptyValuesAsNulls", "true") \
             .option("dataAddress", f"\'{sheet_name}\'!A1") \
-            .option("maxRowsInMemory", 2000)\
+            .option("maxRowsInMemory", 1000)\
             .option("maxByteArraySize", 2147483647)\
             .option("inferSchema", "true") \
             .load(path)
@@ -149,15 +149,14 @@ def write_excel(frame, path_save: str):
     t1 = time.time()
      
     frame.write\
-      .format("csv")\
-      .mode("overwrite")\
+      .format("com.crealytics.spark.excel")\
       .option("header", "true")\
       .save(path_save)
       
     # f_pandas = frame.toPandas()
     # print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
     # f_pandas.to_csv(path_save, index=False)
-    print(f'Save csv file in {time.time() - t1:.2f}')
+    # print(f'Save csv file in {time.time() - t1:.2f}')
     
 
 def check_numeric(value: Tuple[int, float]):
@@ -194,3 +193,15 @@ def concat_col():
     def f(x: list):
         return (''.join([i for i in x if i])).lstrip()
     return udf(f, StringType())
+
+
+def sumcols():
+    def f(lst):
+        s = 0
+        for i in lst:
+            try:
+                s+=float(i)
+            except:
+                pass
+        return s
+    return udf(f)

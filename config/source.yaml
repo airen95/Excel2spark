@@ -1,14 +1,14 @@
 data_path:
-  path : '/content/drive/MyDrive/Excel2spark/input_test/'
-  customer : '/content/drive/MyDrive/Excel2spark/input_test/CUSTOMER.xlsx'
-  scra : '/content/drive/MyDrive/Excel2spark/input_test/SCRA.xlsx'
-  collateral : '/content/drive/MyDrive/Excel2spark/input_test/Collateral.xlsx'
-  netting : '/content/drive/MyDrive/Excel2spark/input_test/Netting.xlsx'
-  guarantee : '/content/drive/MyDrive/Excel2spark/input_test/Guarantee.xlsx'
-  od : '/content/drive/MyDrive/Excel2spark/input_test/OD.xlsx'
-  cc : '/content/drive/MyDrive/Excel2spark/input_test/CC.xlsx'
-  exposure : '/content/drive/MyDrive/Excel2spark/input_test/EXPOSURE.xlsx'
-  parameter : '/content/drive/MyDrive/Excel2spark/input_test/PARAMETER.xlsx'
+  path : '/home/dieule/Desktop/input_test/'
+  customer : '/home/dieule/Downloads/input_test/CUSTOMER.xlsx'
+  scra : '/home/dieule/Downloads/input_test/SCRA.xlsx'
+  collateral : '/home/dieule/Downloads/input_test/Collateral.xlsx'
+  netting : '/home/dieule/Downloads/input_test/Netting.xlsx'
+  guarantee : '/home/dieule/Downloads/input_test/Guarantee.xlsx'
+  od : '/home/dieule/Downloads/input_test/OD.xlsx'
+  cc : '/home/dieule/Downloads/input_test/CC.xlsx'
+  exposure : '/home/dieule/Desktop/input_test/EXPOSURE.xlsx'
+  parameter : '/home/dieule/Downloads/input_test/PARAMETER.xlsx'
 
 select_columns: ['EXPOSURE_ID', 'CUSTOMER_ID', 'ASSET_CLASS_FINAL', 'EXPOSURE_SUB_TYPE_CODE', 'ASSET_CLASS_MANUAL', 'ERA_PRODUCT_TYPE', 'OUTSTANDING_AMT / UTILIZED LIMIT', 'OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY', 'EXPOSURE_CURRENCY', 'EXPOSURE_ORIGINAL_DATE', 'EXPOSURE_MATURITY_DATE', 'REPORTING_DATE', 'SPECIFIC_PROVISION', 'PAST_DUE_FLAG', 'RATING_AGENCY CODE', 'SPECIFIC RATING_COVERED BOND', 'ORIGINAL_MATURITY', 'RESIDUAL_MATURITY', 'BORROWER_INCOME_SOURCE_CURR', 'CPTY_TYPE', 'CPTY_SUB_TYPE', 'LOAN_RETAIL_EXPOSURE NOT SECURED BY REAL ESTATE', 'REG_RETAIL_8B FLAG', 'TRANSACTOR_FLAG', 'REGULATORY_RETAIL_FLAG_B4', 'PRD_CD', 'PRD_SUB_CD', 'ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision %', 'Specific Provision Bucket', 'CUST_RATING', 'LTV', 'LTV Bucket', 'CCF', 'RE_ELIGIBLE P60', 'KEY CATEGORY', 'RW', 'RW_CC', 'EXPOSURE %', 'ADJUSTED_COLL_MATURITY', 'FINAL_ADJUSTED_COLL', 'NETTING_VALUE_ADJUSTED', 'ADJUSTED_GUARANTEE_MATURITY', 'FINAL_ADJUSTED_GUARANTEE', 'EAD BEFORE CRM (ON-BS)', 'EAD BEFORE CRM (OFF-BS)', 'EAD AFTER CRM (ON-BS)', 'EAD AFTER CRM (OFF-BS)', 'RWA_ON_BS', 'RWA_OFF_BS', 'TOTAL_RWA', 'RWA_ON_BS Without CRM', 'RWA_OFF_BS Without CRM', 'TOTAL_RWA Without CRM']
 

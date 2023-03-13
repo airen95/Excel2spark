@@ -27,12 +27,12 @@ def residual_maturity(frame):
 
 
 
-def cpty_type_cpty_sub_type_borrower_income_source_curr(frame, customer):
-    # customer = read_excel(source.data_path['customer'])
+def cpty_type_cpty_sub_type_borrower_income_source_curr(frame):
+    customer = read_excel(source.data_path['customer'])
 
     key1 = 'CUSTOMER_ID'
     key2 = key1
-    cols = ['BORROWER_INCOME_SOURCE_CURR', 'CPTY_TYPE8', 'CPTY_SUB_TYPE9']
+    cols = ['BORROWER_INCOME_SOURCE_CURR', 'CPTY_TYPE8', 'CPTY_SUB_TYPE9', 'CUST_RATING_CD']
 
     frame = join_frame(frame, customer, key1, key2, cols)
 
@@ -76,9 +76,9 @@ def reg_retail_8b_flag(frame):
 
 
 
-def transactor_flag(frame, od, cc):
-    # od = read_excel(source.data_path['od'])
-    # cc  = read_excel(source.data_path['cc'])
+def transactor_flag(frame):
+    od = read_excel(source.data_path['od'])
+    cc  = read_excel(source.data_path['cc'])
 
     frame = frame.join(od, frame.EXPOSURE_ID == od['Số TK vay'], how = 'left').select(frame['*'], od['Transactor flag'].alias('flag1'))
     frame = frame.join(cc, frame.EXPOSURE_ID == cc['Số TK'], how = 'left').select(frame['*'], cc['Transactor flag'].alias('flag2'))
@@ -200,7 +200,7 @@ def specific_provision_bucket(frame):
         ))
     return frame
 
-def cust_rating(frame, customer):
+def cust_rating(frame):
     rating_table_mapping = make_spark_mapping('7. REG TABLE CAL', 'RATING TABLE MAPPING')
     frame = frame.withColumn('tmp2',\
         when(col('ASSET_SUB_CLASS') == 'COVERED BOND RATED',\
@@ -212,14 +212,11 @@ def cust_rating(frame, customer):
     frame = frame.join(rating_table_mapping, (frame['tmp2'] == rating_table_mapping['Concatenated column']) &\
         (frame['ASSET_SUB_CLASS'] == "COVERED BOND RATED"), how = 'left').select(frame['*'], \
             rating_table_mapping['RATING_CD'].alias('CUST_RATING1'))
-    frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))
-
-    # customer = read_excel(source.data_path['customer'])
-    frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['ASSET_SUB_CLASS'] != "COVERED BOND RATED"), how = 'left')\
-        .select(frame['*'], customer['CUST_RATING_CD'].alias('CUST_RATING2'))
+    frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))\
+            .withColumn('CUST_RATING2', when(col('ASSET_SUB_CLASS')!= 'COVERED BOND RATED', col('CUST_RATING_CD')))
 
     frame = frame.withColumn('CUST_RATING', coalesce(frame['CUST_RATING1'], frame['CUST_RATING2'], lit('LT7')))\
-        .drop('CUST_RATING1', 'CUST_RATING2', 'tmp2')
+        .drop('CUST_RATING1', 'CUST_RATING2')
 
     return frame
 
@@ -235,11 +232,11 @@ def exposure_percent(frame):
     frame = frame.withColumn('EXPOSURE %', when(col('EXPOSURE %').isNull(), 0).otherwise(col('EXPOSURE %'))).drop('sum1', 'groupH', 'groupI', 'groupJ')
     return frame
 
-def ltv(frame, collateral):
-    # collateral = read_excel(source.data_path['collateral'])
+def ltv(frame):
+    collateral = read_excel(source.data_path['collateral'])
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['COLL_TYPE','COLL_CCY', 'ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY']#,\
-        # 'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    cols = ['COLL_TYPE','ELIGIBLE_REAL ESTATE','COLL_VALUE','ELIGIBLE_CRM','COLL_ORIGINAL_MATURITY','COLL_REMAINING_MATURITY',\
+        'COLL_CCY', 'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
 
     frame = join_frame(frame, collateral, key1, key2, cols)
     condition = ["CRE_GEN","CRE_INC","RRE_GEN","RRE_INC"]
@@ -301,6 +298,17 @@ def ccf(frame):
     )
     return frame
 
+def re_eligible_p60(frame):
+    tmp = frame.groupBy("CUSTOMER_ID").agg((count(when(col("COLL_TYPE") == 'CRM_RE', 1)).alias("countD")),\
+        (count(when((col("COLL_TYPE") == 'CRM_RE') & (col('ELIGIBLE_REAL ESTATE')=='N'), 1)).alias('countE')))
+    frame = frame.join(tmp, frame['CUSTOMER_ID'] == tmp['CUSTOMER_ID'], how = 'left').select(frame['*'], tmp['countD'], tmp['countE'])
+
+    frame = frame.withColumn('RE_ELIGIBLE P60',\
+        when(frame['countD'] == 0, 'N/A').otherwise(\
+            when(frame['countE'] == 0, 'Y').otherwise('N'))).drop('countD', 'countE')
+
+    return frame
+    
 ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
     "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
     "RRE_GEN","CRE_GEN"]
@@ -342,65 +350,14 @@ def check2concat(col1, col2, col3, col4, col5, col8, col9):
 
 check2concat = udf(check2concat, StringType())
 
-def re_eligible_p60(frame):
-    tmp = frame.groupBy("CUSTOMER_ID").agg((count(when(col("COLL_TYPE") == 'CRM_RE', 1)).alias("countD")),\
-        (count(when((col("COLL_TYPE") == 'CRM_RE') & (col('ELIGIBLE_REAL ESTATE')=='N'), 1)).alias('countE')))
-    frame = frame.join(tmp, frame['CUSTOMER_ID'] == tmp['CUSTOMER_ID'], how = 'left').select(frame['*'], tmp['countD'], tmp['countE'])
-
-    frame = frame.withColumn('RE_ELIGIBLE P60',\
-        when(frame['countD'] == 0, 'N/A').otherwise(\
-            when(frame['countE'] == 0, 'Y').otherwise('N'))).drop('countD', 'countE')
-
-    return frame
-ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
-    "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
-    "RRE_GEN","CRE_GEN"]
-w = ["RETAIL","SME_TT41"]
-
-# col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
-#     'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
-
-def check2concat(col1, col2, col3, col4, col5, col8, col9):
-    if col1 in ae[:2]:
-        return ''.join([col2, col1, col4])
-    else:
-        if col1 in ae[2:11]:
-            return ''.join([col2, col1, col5])
-            # return concat_ws("",col2, col1, col5)
-        else:
-            if (col1 in ae[11:13]) and col9 == 'N':
-                return ''.join([col2, col1, col9])
-                # return concat_ws("",col2, col1, col9)
-            else:
-                if (col1 in ae[12:]) and (col9 == 'N') and (col8 in w):
-                    return ''.join([col2, col1, col9, col8])
-                    # return concat_ws("",col2, col1, col9, col8)
-                else:
-                    if (col1 in ae[12:]) and (col9 == 'N'):
-                        return ''.join([col2, col1, col9, col5, col8])
-                        # return concat_ws("",col2, col1, col9, col5, col8)
-                    else:
-                        if col1 in ae[11:14]:
-                            return ''.join([col2, col1, col7])
-                            # return concat_ws("",col2, col1, col7)
-                        else:
-                            if col1 == 'CRE_GEN' and col8 in w:
-                                return ''.join([col2, col1, col5, col7, col8])
-                                # return concat_ws("",col2, col1, col5, col7, col8)
-                            else:
-                                return ''.join([col2, col1])
-                                # return concat_ws("",col2, col1)
-
-check2concat = udf(check2concat, StringType())
-
 def key_category(frame):
-    # ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
-    #     "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
-    #     "RRE_GEN","CRE_GEN"]
-    # w = ["RETAIL","SME_TT41"]
+    ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
+        "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
+        "RRE_GEN","CRE_GEN"]
+    w = ["RETAIL","SME_TT41"]
 
-    # col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
-    #     'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
+    col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
+        'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
         
     frame = frame.withColumn('KEY CATEGORY', check2concat(col('ASSET_SUB_CLASS'), col('ASSET_CLASS'),\
     col('Specific Provision %'), col('Specific Provision Bucket'), col('CUST_RATING'),\
@@ -460,13 +417,13 @@ def adjusted_coll_maturity(frame):
     # frame = frame.fillna({'ADJUSTED_COLL_MATURITY': 0})
     return frame
 
-def final_adjusted_coll(frame, collateral):
+def final_adjusted_coll(frame):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
 
-    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
-    frame = join_frame(frame, collateral, key1, key2, cols)
+    # key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    # cols = ['ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT']
+    # frame = join_frame(frame, collateral, key1, key2, cols)
     # frame = frame.joim()
 
     frame = frame.fillna( {'ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT':0, 'COLL_CCY': 'N/A'})
@@ -493,15 +450,15 @@ def netting_value_adjusted(frame):
             when(col('NETTING_VALUE_ADJUSTED').isNull(), 'CHECK ERROR').otherwise(col('NETTING_VALUE_ADJUSTED'))).drop('NETTING_EXPOSURE_VALUE')
     return frame
 
-def adjusted_guarantee_maturity(frame, guarantee):
-    # guarantee = read_excel(source.data_path['guarantee'])
+def adjusted_guarantee_maturity(frame):
+    guarantee = read_excel(source.data_path['guarantee'])
     cols = ['GUARANTEE_ORIGINAL_MATURITY',
     'GUARANTEE_REMAINING_MATURITY',
     'ELIGIBLE_GUARANTEE_FLAG',
-    # 'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
+    'ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH',
     'CURRENCY_OF_GUARANTEE',
-    'GUARANTOR_RW']
-    # 'GUARANTEE_RWA']
+    'GUARANTOR_RW',
+    'GUARANTEE_RWA']
     
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
 
@@ -532,12 +489,12 @@ def adjusted_guarantee_maturity(frame, guarantee):
     frame = frame.fillna({'ADJUSTED_GUARANTEE_MATURITY': 0})
     return frame
 
-def final_adjusted_guarantee(frame, guarantee):
+def final_adjusted_guarantee(frame):
     key_mapping = make_spark_mapping('9. REG TABLE', 'KEY CONFIGURATIONS')
     value = float(key_mapping.select('VALUE').collect()[0][0])
-    key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH']
-    frame = join_frame(frame, guarantee, key1, key2, cols)
+    # key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
+    # cols = ['ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH']
+    # frame = join_frame(frame, guarantee, key1, key2, cols)
 
     frame = frame.withColumn('tmp',\
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('ALLOCATED_GUARANTEE_AFTER_MT_MISMATCH')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0)    
@@ -551,6 +508,7 @@ def final_adjusted_guarantee(frame, guarantee):
 
 def ead_before_crm_on_bs(frame):
     col2sum = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY']
+
     frame = frame.withColumn('sum', sumcols()(struct([col(x) for x in col2sum])))\
         .withColumn('EAD BEFORE CRM (ON-BS)',\
             when((is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')) == 1), 0).otherwise(\
@@ -595,10 +553,10 @@ def ead_after_crm_off_bs(frame):
 
     return frame
 
-def rwa_on_bs(frame, guarantee):
+def rwa_on_bs(frame):
     key1, key2 = 'CUSTOMER_ID', 'CUSTOMER_ID'
-    cols = ['GUARANTEE_RWA']
-    frame = join_frame(frame, guarantee, key1, key2, cols)
+    # cols = ['GUARANTEE_RWA']
+    # frame = join_frame(frame, guarantee, key1, key2, cols)
 
     frame = frame.withColumn('tt', \
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('GUARANTEE_RWA')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0))\
@@ -618,48 +576,4 @@ def final_cols(frame):
         .withColumn('RWA_ON_BS Without CRM', col('EAD BEFORE CRM (ON-BS)')* col('RW_CC'))\
         .withColumn('RWA_OFF_BS Without CRM', col('EAD BEFORE CRM (OFF-BS)')*col('RW_CC'))\
             .withColumn('TOTAL_RWA Without CRM', col('RWA_OFF_BS Without CRM') + col('RWA_ON_BS Without CRM'))
-    return frame
-
-
-
-############################33
-def transactor_flag_od():
-    frame = read_excel(source.data_path['od'])
-    frame = frame.where(~col('Mã KH').isNull())
-
-
-    cols1 = frame.columns[4:15]
-    cols2 = frame.columns[3:14]
-
-    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
-    .withColumn('Transactor flag',\
-        when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))
-        ).drop('numeric_count', 'check_zero', 'check_if')
-
-    return frame
-
-def transactor_flag_cc():
-    frame = read_excel(source.data_path['cc'])
-
-    cols1 = frame.columns[4:16]
-    cols2 = frame.columns[17:29]
-
-    cols4 = frame.columns[18:30]
-    cols3 = frame.columns[5:17]
-
-    frame = frame.withColumn('count1',\
-        reduce(add, [check_numeric(col(x)) for x in cols1]) + reduce(add, [check_numeric(col(x)) for x in cols2]))\
-        .withColumn('minus1', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols1, cols2)]))\
-        .withColumn('count2',\
-        reduce(add, [check_numeric(col(x)) for x in cols3]) + reduce(add, [check_numeric(col(x)) for x in cols4]))\
-        .withColumn('minus2', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols3, cols4)]))\
-        .withColumn('Transactor flag',\
-        when(col('Tag_trano').isin('M', 'JCB'),\
-            when((col('count1') == 24) & (col('minus1') == 0), 'Y').otherwise('N')
-            ).otherwise(\
-                when((col('count2') == 24) & (col('minus2') == 0), 'Y').otherwise('N')
-                )).drop('count1', 'count2', 'minus1', 'minus2')
-
     return frame

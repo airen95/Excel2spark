@@ -1,9 +1,10 @@
 from omegaconf import OmegaConf
 import time
 from tqdm import tqdm
+from pyspark.sql.functions import col
 
-from src.flow_process.flow_1 import flow_1 
-from src.flow_process.flow_2 import flow_2 
+
+from src.flow_process.flow_6 import *
 from src.utils import write_excel
 
 
@@ -47,3 +48,10 @@ if __name__ == "__main__":
     write_excel(list_tables[2], path_save(path_3))
     write_excel(list_tables[3], path_save(path_5))
     write_excel(list_tables[6], path_save(path_6))
+    
+    t1 = time.time()
+    exposure = flow_exposure(path_6)
+    exposure = exposure.select(*select_columns)
+    write_excel(exposure, 'output/exposure.xlsx')
+
+    print(f'Process in {time.time() - t1}.2f')
