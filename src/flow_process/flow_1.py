@@ -15,20 +15,16 @@ from src.flow_process.flow_2 import *
 def flow_table_1(path: str, table_2):
     """Table 1"""
     frame = read_excel(path)
-    # frame = frame.where(~col('CUSTOMER_ID').isNull())
-
-    # frame = frame.where(~col('CUSTOMER_ID').isNull())
     frame = cpty_type_cpty_sub_type(frame)
     frame = cust_rating_cd(frame, table_2)
-    # write_excel(frame, path)   
+
     return frame
 
 def flow_table_2():
     """Table 2"""
     frame = make_spark_mapping_SCRA('2. SCRA', 'SCRA')
     frame = scra_group(frame)
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
-    # write_excel(frame, path)     
+       
     return frame
 
 def flow_od():
