@@ -204,18 +204,18 @@ def cust_rating(frame, customer):
     rating_table_mapping = make_spark_mapping('7. REG TABLE CAL', 'RATING TABLE MAPPING')
     frame = frame.withColumn('tmp2',\
         when(col('ASSET_SUB_CLASS') == 'COVERED BOND RATED',\
-            when(~concat(col('RATING_AGENCY CODE'), col('SPECIFIC RATING_COVERED BOND')).isin(['NANA', '']),\
+            when(~concat_ws('',col('RATING_AGENCY CODE'), col('SPECIFIC RATING_COVERED BOND')).isin(['NANA', '']),\
                 concat(col('RATING_AGENCY CODE'), col('SPECIFIC RATING_COVERED BOND'))).otherwise('CHECK AGAIN')).otherwise(\
                     col('CUSTOMER_ID')                
                     )   
         )
     frame = frame.join(rating_table_mapping, (frame['tmp2'] == rating_table_mapping['Concatenated column']) &\
-        (frame['tmp2'] == "COVERED BOND RATED"), how = 'left').select(frame['*'], \
+        (frame['ASSET_SUB_CLASS'] == "COVERED BOND RATED"), how = 'left').select(frame['*'], \
             rating_table_mapping['RATING_CD'].alias('CUST_RATING1'))
     frame = frame.withColumn('CUST_RATING1', when(col('tmp2') == 'CHECK AGAIN', 'CHECK_AGAIN').otherwise(col('CUST_RATING1')))
 
     # customer = read_excel(source.data_path['customer'])
-    frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['tmp2'] != "COVERED BOND RATED"), how = 'left')\
+    frame = frame.join(customer, (frame['tmp2'] == customer['CUSTOMER_ID'])&(frame['ASSET_SUB_CLASS'] != "COVERED BOND RATED"), how = 'left')\
         .select(frame['*'], customer['CUST_RATING_CD'].alias('CUST_RATING2'))
 
     frame = frame.withColumn('CUST_RATING', coalesce(frame['CUST_RATING1'], frame['CUST_RATING2'], lit('LT7')))\
@@ -301,16 +301,6 @@ def ccf(frame):
     )
     return frame
 
-def re_eligible_p60(frame):
-    tmp = frame.groupBy("CUSTOMER_ID").agg((count(when(col("COLL_TYPE") == 'CRM_RE', 1)).alias("countD")),\
-        (count(when((col("COLL_TYPE") == 'CRM_RE') & (col('ELIGIBLE_REAL ESTATE')=='N'), 1)).alias('countE')))
-    frame = frame.join(tmp, frame['CUSTOMER_ID'] == tmp['CUSTOMER_ID'], how = 'left').select(frame['*'], tmp['countD'], tmp['countE'])
-
-    frame = frame.withColumn('RE_ELIGIBLE P60',\
-        when(frame['countD'] == 0, 'N/A').otherwise(\
-            when(frame['countE'] == 0, 'Y').otherwise('N'))).drop('countD', 'countE')
-
-    return frame
 ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
     "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
     "RRE_GEN","CRE_GEN"]
@@ -352,14 +342,65 @@ def check2concat(col1, col2, col3, col4, col5, col8, col9):
 
 check2concat = udf(check2concat, StringType())
 
-def key_category(frame):
-    ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
-        "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
-        "RRE_GEN","CRE_GEN"]
-    w = ["RETAIL","SME_TT41"]
+def re_eligible_p60(frame):
+    tmp = frame.groupBy("CUSTOMER_ID").agg((count(when(col("COLL_TYPE") == 'CRM_RE', 1)).alias("countD")),\
+        (count(when((col("COLL_TYPE") == 'CRM_RE') & (col('ELIGIBLE_REAL ESTATE')=='N'), 1)).alias('countE')))
+    frame = frame.join(tmp, frame['CUSTOMER_ID'] == tmp['CUSTOMER_ID'], how = 'left').select(frame['*'], tmp['countD'], tmp['countE'])
 
-    col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
-        'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
+    frame = frame.withColumn('RE_ELIGIBLE P60',\
+        when(frame['countD'] == 0, 'N/A').otherwise(\
+            when(frame['countE'] == 0, 'Y').otherwise('N'))).drop('countD', 'countE')
+
+    return frame
+ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
+    "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
+    "RRE_GEN","CRE_GEN"]
+w = ["RETAIL","SME_TT41"]
+
+# col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
+#     'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
+
+def check2concat(col1, col2, col3, col4, col5, col8, col9):
+    if col1 in ae[:2]:
+        return ''.join([col2, col1, col4])
+    else:
+        if col1 in ae[2:11]:
+            return ''.join([col2, col1, col5])
+            # return concat_ws("",col2, col1, col5)
+        else:
+            if (col1 in ae[11:13]) and col9 == 'N':
+                return ''.join([col2, col1, col9])
+                # return concat_ws("",col2, col1, col9)
+            else:
+                if (col1 in ae[12:]) and (col9 == 'N') and (col8 in w):
+                    return ''.join([col2, col1, col9, col8])
+                    # return concat_ws("",col2, col1, col9, col8)
+                else:
+                    if (col1 in ae[12:]) and (col9 == 'N'):
+                        return ''.join([col2, col1, col9, col5, col8])
+                        # return concat_ws("",col2, col1, col9, col5, col8)
+                    else:
+                        if col1 in ae[11:14]:
+                            return ''.join([col2, col1, col7])
+                            # return concat_ws("",col2, col1, col7)
+                        else:
+                            if col1 == 'CRE_GEN' and col8 in w:
+                                return ''.join([col2, col1, col5, col7, col8])
+                                # return concat_ws("",col2, col1, col5, col7, col8)
+                            else:
+                                return ''.join([col2, col1])
+                                # return concat_ws("",col2, col1)
+
+check2concat = udf(check2concat, StringType())
+
+def key_category(frame):
+    # ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
+    #     "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
+    #     "RRE_GEN","CRE_GEN"]
+    # w = ["RETAIL","SME_TT41"]
+
+    # col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
+    #     'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
         
     frame = frame.withColumn('KEY CATEGORY', check2concat(col('ASSET_SUB_CLASS'), col('ASSET_CLASS'),\
     col('Specific Provision %'), col('Specific Provision Bucket'), col('CUST_RATING'),\
@@ -509,15 +550,17 @@ def final_adjusted_guarantee(frame, guarantee):
     return frame
 
 def ead_before_crm_on_bs(frame):
-    colsum = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY', 'SPECIFIC_PROVISION']
-    frame = frame.withColumn('EAD BEFORE CRM (ON-BS)',\
-        when(is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')) == 1, 0).otherwise(\
-            when(is_error(col('CCF')) == 1,\
-                when((is_error(col('SPECIFIC_PROVISION'))==1), reduce(add, [coalesce(col(x), lit(0)) for x in colsum[:-1]])).otherwise(\
-                    greatest(lit(0), reduce(add, [coalesce(col(x), lit(0)) for x in colsum[:-1]]) - col('SPECIFIC_PROVISION')))           
-                ).otherwise(0)
-            )    
-        )
+    col2sum = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY']
+    frame = frame.withColumn('sum', sumcols()(struct([col(x) for x in col2sum])))\
+        .withColumn('EAD BEFORE CRM (ON-BS)',\
+            when((is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')) == 1), 0).otherwise(\
+                when(is_error(col('CCF'))==1, \
+                    when((is_error(col('SPECIFIC_PROVISION'))==1) | (col('SPECIFIC_PROVISION').isNull()), col('sum')).otherwise(\
+                        greatest(lit(0), col('sum') - col('SPECIFIC_PROVISION'))
+                        )               
+                    ).otherwise(0)
+                )        
+            )
     return frame
 
 def ead_before_crm_off_bs(frame):

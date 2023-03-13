@@ -193,3 +193,15 @@ def concat_col():
     def f(x: list):
         return (''.join([i for i in x if i])).lstrip()
     return udf(f, StringType())
+
+
+def sumcols():
+    def f(lst):
+        s = 0
+        for i in lst:
+            try:
+                s+=float(i)
+            except:
+                pass
+        return s
+    return udf(f)

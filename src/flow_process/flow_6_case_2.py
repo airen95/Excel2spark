@@ -1,4 +1,4 @@
-from src.columns_process.exposure_case_1 import *
+from src.columns_process.exposure_case_2 import *
 from src.utils import *
 
 def flow_exposure(path_exposure: str):
