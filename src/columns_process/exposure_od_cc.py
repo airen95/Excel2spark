@@ -568,15 +568,18 @@ def ead_before_crm_off_bs(frame):
     ccf_mapping = ccf_mapping.where(col('CCF_CD')!='NaN')
     ccf_dct = make_lookup(ccf_mapping, 'CCF_CD', 'CCF%')
 
-    colsum  = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY']
+    # colsum  = ['OUTSTANDING_AMT_LCY / UTILIZED LIMIT', 'ACCRUED_INTEREST_LCY', 'OUTSTANDING_FEES_PENALITIES_LCY']
 
-    frame = frame.withColumn('t',\
-        map_dct(ccf_dct)(col('CCF')))\
+    frame = frame.withColumn('ratio', map_dct(ccf_dct)(col('CCF')).cast('double'))\
         .withColumn('EAD BEFORE CRM (OFF-BS)',\
-            when((col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')=='NA') | (is_error('CCF')==1), 0).otherwise(\
-                when(is_error(col('SPECIFIC_PROVISION'))==1, col('t')*reduce(add, [col(x) for x in colsum])).otherwise(\
-                    greatest(lit(0), col('t')*(reduce(add, [col(x) for x in colsum]) - coalesce(lit(0),col('SPECIFIC_PROVISION')))))
-            )).drop('t')
+            when((is_error(col('OUTSTANDING_AMT_LCY / UTILIZED LIMIT')) == 1), 0).otherwise(\
+                when((is_error(col('CCF'))==1) |( col('CCF').isNull()), 0).otherwise(\
+                    when((is_error(col('SPECIFIC_PROVISION'))==1) | (col('SPECIFIC_PROVISION').isNull()), col('ratio')*col('sum')).otherwise(\
+                        greatest(lit(0), (col('ratio'))*(col('sum') - col('SPECIFIC_PROVISION')))
+                        )                
+                    )
+                )
+            ).drop('sum', 'ratio')
 
     return frame
 
@@ -603,13 +606,13 @@ def rwa_on_bs(frame, guarantee):
     frame = frame.withColumn('tt', \
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('GUARANTEE_RWA')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0))\
         .withColumn('ttt',\
-        when(is_error(col('CCF')) == 1, col('EAD AFTER CRM (ON-BS)')*col('RW_CC')+col('tt')*col('EXPOSURE %')).otherwise(0))\
+        when(is_error(col('CCF')) == 1, col('EAD AFTER CRM (ON-BS)')*col('RW_CC').cast('float')+col('tt')*col('EXPOSURE %')).otherwise(0))\
         .withColumn('RWA_ON_BS', greatest(lit(0), col('ttt'))).drop('ttt')
     return frame
 
 def rwa_off_bs(frame):
     frame = frame.withColumn('ttt',\
-        when(is_error(col('CCF')) == 0, col('EAD AFTER CRM (ON-BS)')*col('RW_CC')+col('tt')*col('EXPOSURE %')).otherwise(0))\
+        when(is_error(col('CCF')) == 0, col('EAD AFTER CRM (OFF-BS)')*col('RW_CC').cast('float')+col('tt')*col('EXPOSURE %')).otherwise(0))\
         .withColumn('RWA_OFF_BS', greatest(lit(0), col('ttt'))).drop('tt', 'ttt', 'GUARANTOR_RW', 'GUARANTEE_RWA')
     return frame
 
@@ -617,7 +620,7 @@ def final_cols(frame):
     frame = frame.withColumn('TOTAL_RWA', col('RWA_ON_BS') + col('RWA_OFF_BS'))\
         .withColumn('RWA_ON_BS Without CRM', col('EAD BEFORE CRM (ON-BS)')* col('RW_CC'))\
         .withColumn('RWA_OFF_BS Without CRM', col('EAD BEFORE CRM (OFF-BS)')*col('RW_CC'))\
-            .withColumn('TOTAL_RWA Without CRM', col('RWA_OFF_BS Without CRM') + col('RWA_ON_BS Without CRM'))
+            .withColumn('TOTAL_RWA Without CRM',coalesce(col('RWA_OFF_BS Without CRM'), lit(0)) + coalesce(lit(0), col('RWA_ON_BS Without CRM')))
     return frame
 
 

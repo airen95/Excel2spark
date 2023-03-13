@@ -127,7 +127,7 @@ def map_dct(ccf_dct):
         if value_in in ccf_dct:
             return float(ccf_dct[value_in])
         else:
-            return 'N/A'
+            return 0
     return udf(ff)
 
 # map_dct = udf(map_dct, StringType())
