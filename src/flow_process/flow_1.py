@@ -15,9 +15,9 @@ from src.flow_process.flow_2 import *
 def flow_table_1(path: str, table_2):
     """Table 1"""
     frame = read_excel(path)
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
+    # frame = frame.where(~col('CUSTOMER_ID').isNull())
 
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
+    # frame = frame.where(~col('CUSTOMER_ID').isNull())
     frame = cpty_type_cpty_sub_type(frame)
     frame = cust_rating_cd(frame, table_2)
     # write_excel(frame, path)   
@@ -27,6 +27,7 @@ def flow_table_2():
     """Table 2"""
     frame = make_spark_mapping_SCRA('2. SCRA', 'SCRA')
     frame = scra_group(frame)
+    frame = frame.where(~col('CUSTOMER_ID').isNull())
     # write_excel(frame, path)     
     return frame
 
@@ -48,7 +49,6 @@ def flow_cc():
 def flow_table_3_for_flow1(path: str):
     """Table 3 without last col"""
     frame = read_excel(path)
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
 
     frame = ori_mature_remaining_mature(frame)
     frame = coll_remaining_origin_maturity(frame)
@@ -65,9 +65,6 @@ def flow_table_3_for_flow1(path: str):
 def flow_table_5_for_flow1(path: str):
     """Table 5 without last 2 cols"""
     frame = read_excel(path)
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
-
-    frame = frame.where(~col('CUSTOMER_ID').isNull())
     frame = ori_mature_remain_mature_crm_eligible(frame)
     # frame = allocate_guarantee(frame)
     # frame = guarantee_rwa(frame)

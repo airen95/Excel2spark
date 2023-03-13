@@ -201,7 +201,7 @@ def final_col(frame, exposure):
                 .withColumn("ALLOCATED_COLLATERAL_AFTER_MT_MISMATCH_AND_HAIRCUT", \
                             col("sum")*col("COLL_CRM_ELIGIBLE %") * (1-col('HAIRCUT%'))).drop("ADJUSTED_COLL_MATURITY") \
                 .withColumn("HAIRCUT%", concat(col("HAIRCUT%") * 100, lit("%"))) \
-                .withColumn("COLL_CRM_ELIGIBLE %", concat(col("HAIRCUT%") * 100, lit("%"))) \
+                .withColumn("COLL_CRM_ELIGIBLE %", concat(col("COLL_CRM_ELIGIBLE %") * 100, lit("%"))) \
                 .drop("sum", "HAIRCUTT")
 
     frame = frame.where(~col("CUSTOMER_ID").isNull())

@@ -13,7 +13,7 @@ spark = SparkSession.builder\
     .config('spark.sql.debug.maxToStringFields', 2000)\
     .config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2")\
     .config("spark.driver.memory","4g")\
-    .config("spark.executor.memory", '1g')\
+    .config("spark.executor.memory", '4g')\
     .getOrCreate()
     
 # sc = spark.sparkContext
@@ -149,7 +149,8 @@ def write_excel(frame, path_save: str):
     t1 = time.time()
      
     frame.write\
-      .format("com.crealytics.spark.excel")\
+      .format("csv")\
+      .mode("overwrite")\
       .option("header", "true")\
       .save(path_save)
       
