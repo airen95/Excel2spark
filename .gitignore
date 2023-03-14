@@ -8,3 +8,4 @@ src/*/*pyc
 ipynb_checkpoints
 input_test
 config/*.yaml
+*yaml

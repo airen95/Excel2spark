@@ -618,11 +618,10 @@ def rwa_off_bs(frame):
 
 def final_cols(frame):
     frame = frame.withColumn('TOTAL_RWA', col('RWA_ON_BS') + col('RWA_OFF_BS'))\
-        .withColumn('RWA_ON_BS Without CRM', col('EAD BEFORE CRM (ON-BS)')* col('RW_CC'))\
-        .withColumn('RWA_OFF_BS Without CRM', col('EAD BEFORE CRM (OFF-BS)')*col('RW_CC'))\
+        .withColumn('RWA_ON_BS Without CRM', col('EAD BEFORE CRM (ON-BS)')* col('RW_CC').cast('double'))\
+        .withColumn('RWA_OFF_BS Without CRM', col('EAD BEFORE CRM (OFF-BS)')*col('RW_CC').cast('double'))\
             .withColumn('TOTAL_RWA Without CRM',coalesce(col('RWA_OFF_BS Without CRM'), lit(0)) + coalesce(lit(0), col('RWA_ON_BS Without CRM')))
     return frame
-
 
 
 ############################33
@@ -636,13 +635,12 @@ def transactor_flag_od():
     frame = read_excel(source.data_path['od'])
     frame = frame.where(~col('Mã KH').isNull())
 
-
     cols1 = frame.columns[4:15]
     cols2 = frame.columns[3:14]
 
-    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_zero', reduce(add, [check_zero(col(x)) for x in frame.columns[3:15]]))\
-    .withColumn('check_if', reduce(add, [check_divide(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
+    frame = frame.withColumn("numeric_count", reduce(add, [check_numeric()(col(x)) for x in frame.columns[3:15]]))\
+    .withColumn('check_zero', reduce(add, [check_zero()(col(x)) for x in frame.columns[3:15]]))\
+    .withColumn('check_if', reduce(add, [check_divide()(col(x), col(y)) for x, y in zip(cols1, cols2)]))\
     .withColumn('Transactor flag',\
         when(col('check_zero')>1, 'N').otherwise(when((col('numeric_count') == 12) & (col('check_if')<1), 'Y').otherwise('N'))
         ).drop('numeric_count', 'check_zero', 'check_if')
@@ -651,6 +649,8 @@ def transactor_flag_od():
 
 def transactor_flag_cc():
     frame = read_excel(source.data_path['cc'])
+    frame = frame.where(~col('CUST_NO').isNull())
+   
 
     cols1 = frame.columns[4:16]
     cols2 = frame.columns[17:29]
@@ -659,11 +659,11 @@ def transactor_flag_cc():
     cols3 = frame.columns[5:17]
 
     frame = frame.withColumn('count1',\
-        reduce(add, [check_numeric(col(x)) for x in cols1]) + reduce(add, [check_numeric(col(x)) for x in cols2]))\
-        .withColumn('minus1', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols1, cols2)]))\
+        reduce(add, [check_numeric()(col(x)) for x in cols1]) + reduce(add, [check_numeric()(col(x)) for x in cols2]))\
+        .withColumn('minus1', reduce(add, [check_zero()(col(y) - col(x)) for x, y in zip(cols1, cols2)]))\
         .withColumn('count2',\
-        reduce(add, [check_numeric(col(x)) for x in cols3]) + reduce(add, [check_numeric(col(x)) for x in cols4]))\
-        .withColumn('minus2', reduce(add, [check_zero(col(y) - col(x)) for x, y in zip(cols3, cols4)]))\
+        reduce(add, [check_numeric()(col(x)) for x in cols3]) + reduce(add, [check_numeric()(col(x)) for x in cols4]))\
+        .withColumn('minus2', reduce(add, [check_zero()(col(y) - col(x)) for x, y in zip(cols3, cols4)]))\
         .withColumn('Transactor flag',\
         when(col('Tag_trano').isin('M', 'JCB'),\
             when((col('count1') == 24) & (col('minus1') == 0), 'Y').otherwise('N')
