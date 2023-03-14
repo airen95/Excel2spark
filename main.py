@@ -27,7 +27,7 @@ def run(path_1, path_3, path_5, path_6):
     table_1, table_2, table_3, table_od, table_cc, table_5, table_6 = flow_1(path_1, path_3, path_5, path_6)
     
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
-    
+    table = table.select(*select_columns)
     list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6]
     print(f'All process in {time.time() - t1:.2f}')
     

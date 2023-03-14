@@ -6,6 +6,7 @@ import pandas as pd
 from .constmap import *
 from typing import Tuple
 from omegaconf import OmegaConf
+import re
 
 
 source = OmegaConf.load('config/source.yaml')
@@ -160,35 +161,67 @@ def write_excel(frame, path_save: str):
     # print(f'Save csv file in {time.time() - t1:.2f}')
     
 
-def check_numeric(value: Tuple[int, float]):
-    try:
-        value = str(value)
-        if re.search('\d+', value):
+# def check_numeric(value: Tuple[int, float]):
+#     try:
+#         value = str(value)
+#         if re.search('\d+', value):
+#             return 1
+#         return 0
+#     except:
+#         return 0
+
+
+# def check_divide(value1: Tuple[int, float], value2:  Tuple[int, float]):
+#     try:
+#         if value1/value2 < 1:
+#             return 1
+#         return 0
+#     except:
+#         return 0
+
+# def check_zero(value:  Tuple[int, float]):
+#     try:
+#         if value < 0:
+#             return 1
+#         return 0
+#     except:
+#         return 1
+
+# check_zero = udf(check_zero, IntegerType())
+# check_divide = udf(check_divide, IntegerType())
+# check_numeric = udf(check_numeric, IntegerType())
+
+def check_numeric():
+    def f(value):
+        try:
+            value = str(value)
+            if re.search('\d+', value):
+                return 1
+            return 0
+        except:
+            return 0
+    return udf(f, IntegerType())
+
+
+def check_divide():
+    def f(value1, value2):
+        try:
+            if value1/value2 < 1:
+                return 1
+            return 0
+        except:
+            return 0
+    return udf(f, IntegerType())
+
+def check_zero():
+    def f(value):
+        try:
+            if value < 0:
+                return 1
+            return 0
+        except:
             return 1
-        return 0
-    except:
-        return 0
-
-
-def check_divide(value1: Tuple[int, float], value2:  Tuple[int, float]):
-    try:
-        if value1/value2 < 1:
-            return 1
-        return 0
-    except:
-        return 0
-
-def check_zero(value:  Tuple[int, float]):
-    try:
-        if value < 0:
-            return 1
-        return 0
-    except:
-        return 1
-
-check_zero = udf(check_zero, IntegerType())
-check_divide = udf(check_divide, IntegerType())
-check_numeric = udf(check_numeric, IntegerType())
+    return udf(f, IntegerType())
 
 def concat_col():
     def f(x: list):

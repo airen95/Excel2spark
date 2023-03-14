@@ -561,13 +561,13 @@ def rwa_on_bs(frame):
     frame = frame.withColumn('tt', \
         when(col('GUARANTOR_RW') < col('RW_CC'), sum(col('GUARANTEE_RWA')).over(Window.partitionBy('CUSTOMER_ID'))).otherwise(0))\
         .withColumn('ttt',\
-        when(is_error(col('CCF')) == 1, col('EAD AFTER CRM (ON-BS)')*col('RW_CC')+col('tt')*col('EXPOSURE %')).otherwise(0))\
+        when(is_error(col('CCF')) == 1, col('EAD AFTER CRM (ON-BS)')*col('RW_CC').cast('float')+col('tt')*col('EXPOSURE %')).otherwise(0))\
         .withColumn('RWA_ON_BS', greatest(lit(0), col('ttt'))).drop('ttt')
     return frame
 
 def rwa_off_bs(frame):
     frame = frame.withColumn('ttt',\
-        when(is_error(col('CCF')) == 0, col('EAD AFTER CRM (ON-BS)')*col('RW_CC')+col('tt')*col('EXPOSURE %')).otherwise(0))\
+        when(is_error(col('CCF')) == 0, col('EAD AFTER CRM (ON-BS)')*col('RW_CC').cast('float')+col('tt')*col('EXPOSURE %')).otherwise(0))\
         .withColumn('RWA_OFF_BS', greatest(lit(0), col('ttt'))).drop('tt', 'ttt', 'GUARANTOR_RW', 'GUARANTEE_RWA')
     return frame
 

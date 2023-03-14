@@ -84,6 +84,7 @@ def flow_2(table_3, table_5, table_6):
     table_5 = flow_table_5_for_col_O(table_5, table_6)
     table_6 = flow_table_6_for_AU_AY(table_6, table_5)
     table_5 = flow_table_5_for_col_P(table_5, table_6)
+    table_6 = flow_table_6_for_AZ_BE(table_6, table_5)
     # on_table, off_table = flow_table_11(table_6)
     on_table, off_table = [], []
     print('---------Done flow 2 --------------')
