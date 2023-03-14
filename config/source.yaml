@@ -14,12 +14,12 @@ select_columns: ['EXPOSURE_ID', 'CUSTOMER_ID', 'ASSET_CLASS_FINAL', 'EXPOSURE_SU
 
 
 path_save:
-  customer : './output/CUSTOMER/CUSTOMER.xlsb'
-  scra : './output/SCRA/SCRA.xlsb'
-  collateral : './output/Collateral/Collateral.xlsb'
-  netting : './output/Netting/Netting.xlsb'
-  guarantee : './output/Guarantee/Guarantee.xlsb'
-  od : './output/OD/OD.xlsb'
-  cc : './output/CC/CC.xlsb'
-  exposure : './output/EXPOSURE/EXPOSURE.xlsb'
-  parameter : './output/PARAMETER/PARAMETER.xlsb'
+  customer : './output/CUSTOMER/CUSTOMER.xlsx'
+  scra : './output/SCRA/SCRA.xlsx'
+  collateral : './output/Collateral/Collateral.xlsx'
+  netting : './output/Netting/Netting.xlsx'
+  guarantee : './output/Guarantee/Guarantee.xlsx'
+  od : './output/OD/OD.xlsx'
+  cc : './output/CC/CC.xlsx'
+  exposure : './output/EXPOSURE/EXPOSURE.xlsx'
+  parameter : './output/PARAMETER/PARAMETER.xlsx'

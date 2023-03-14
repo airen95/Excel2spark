@@ -2,7 +2,6 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
 import time
-import re
 import pandas as pd
 from .constmap import *
 from typing import Tuple
@@ -15,7 +14,8 @@ spark = SparkSession.builder\
     .config('spark.sql.debug.maxToStringFields', 2000)\
     .config("spark.jars.packages", "com.crealytics:spark-excel_2.12:3.1.1_0.18.2")\
     .config("spark.driver.memory","4g")\
-    .config("spark.executor.memory", '4g')\
+    .config("spark.executor.memory", '2g')\
+    .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
     .getOrCreate()
     
 # sc = spark.sparkContext
@@ -160,69 +160,37 @@ def write_excel(frame, path_save: str):
     # print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
     # f_pandas.to_csv(path_save, index=False)
     print(f'Save csv file in {time.time() - t1:.2f}')
-    
-
-# def check_numeric(value: Tuple[int, float]):
-#     try:
-#         value = str(value)
-#         if re.search('\d+', value):
-#             return 1
-#         return 0
-#     except:
-#         return 0
 
 
-# def check_divide(value1: Tuple[int, float], value2:  Tuple[int, float]):
-#     try:
-#         if value1/value2 < 1:
-#             return 1
-#         return 0
-#     except:
-#         return 0
-
-# def check_zero(value:  Tuple[int, float]):
-#     try:
-#         if value < 0:
-#             return 1
-#         return 0
-#     except:
-#         return 1
-
-# check_zero = udf(check_zero, IntegerType())
-# check_divide = udf(check_divide, IntegerType())
-# check_numeric = udf(check_numeric, IntegerType())
-
-def check_numeric():
-    def f(value):
-        try:
-            value = str(value)
-            if re.search('\d+', value):
-                return 1
-            return 0
-        except:
-            return 0
-    return udf(f, IntegerType())
-
-
-def check_divide():
-    def f(value1, value2):
-        try:
-            if value1/value2 < 1:
-                return 1
-            return 0
-        except:
-            return 0
-    return udf(f, IntegerType())
-
-def check_zero():
-    def f(value):
-        try:
-            if value < 0:
-                return 1
-            return 0
-        except:
+def check_numeric(value: Tuple[int, float]):
+    try:
+        value = str(value)
+        if re.search('\d+', value):
             return 1
-    return udf(f, IntegerType())
+        return 0
+    except:
+        return 0
+
+
+def check_divide(value1: Tuple[int, float], value2:  Tuple[int, float]):
+    try:
+        if value1/value2 < 1:
+            return 1
+        return 0
+    except:
+        return 0
+
+def check_zero(value:  Tuple[int, float]):
+    try:
+        if value < 0:
+            return 1
+        return 0
+    except:
+        return 1
+
+check_zero = udf(check_zero, IntegerType())
+check_divide = udf(check_divide, IntegerType())
+check_numeric = udf(check_numeric, IntegerType()) 
 
 def concat_col():
     def f(x: list):
