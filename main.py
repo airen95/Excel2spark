@@ -28,7 +28,7 @@ def run(path_1, path_3, path_5, path_6):
     
     table_3, table_5, table_6, on_table, off_table = flow_2(table_3, table_5, table_6)
     
-    list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6]
+    list_tables = [table_1, table_2, table_3, table_5, table_od, table_cc, table_6, on_table, off_table]
     print(f'All process in {time.time() - t1:.2f}')
     
     return list_tables
@@ -47,6 +47,8 @@ if __name__ == "__main__":
     write_excel(list_tables[2], path_save(path_3))
     write_excel(list_tables[3], path_save(path_5))
     write_excel(list_tables[6], path_save(path_6))
+    # write_excel(list_tables[7], "./output/ontable")
+    # write_excel(list_tables[8], "./output/offtable")
     
     # # t1 = time.time()
     # exposure = flow_exposure(path_6)

@@ -627,6 +627,12 @@ def final_cols(frame):
 
 ############################33
 def transactor_flag_od():
+    """
+    =IFERROR(IF(AND(COUNT(D2:O2)=12,SUM(IF((E2:O2/D2:N2)<1,1,0))=0),
+        "Y",
+        ELSE:
+            "N"),"N")
+    """
     frame = read_excel(source.data_path['od'])
     frame = frame.where(~col('Mã KH').isNull())
 

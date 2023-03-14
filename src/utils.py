@@ -2,6 +2,7 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
 import time
+import re
 import pandas as pd
 from .constmap import *
 from typing import Tuple
@@ -149,7 +150,7 @@ def write_excel(frame, path_save: str):
     t1 = time.time()
      
     frame.write\
-      .format("csv")\
+      .format("com.crealytics.spark.excel")\
       .mode("overwrite")\
       .option("header", "true")\
       .save(path_save)
@@ -157,7 +158,7 @@ def write_excel(frame, path_save: str):
     # f_pandas = frame.toPandas()
     # print(f'Convert Spark to Pandas in {time.time() - t1:.2f}')
     # f_pandas.to_csv(path_save, index=False)
-    # print(f'Save csv file in {time.time() - t1:.2f}')
+    print(f'Save csv file in {time.time() - t1:.2f}')
     
 
 def check_numeric(value: Tuple[int, float]):
