@@ -40,13 +40,13 @@ if __name__ == "__main__":
     list_tables = run(path_1, path_3, path_5, path_6)
   
 
-    write_excel(list_tables[0], path_save(path_1))
-    write_excel(list_tables[1], path_save(path_2))
-    write_excel(list_tables[4], path_save(path_od))
-    write_excel(list_tables[5], path_save(path_cc))
-    write_excel(list_tables[2], path_save(path_3))
-    write_excel(list_tables[3], path_save(path_5))
-    write_excel(list_tables[6], path_save(path_6))
+    write_excel(list_tables[0], cfg.path_save.customer)
+    write_excel(list_tables[1], cfg.path_save.scra)
+    write_excel(list_tables[4], cfg.path_save.od)
+    write_excel(list_tables[5], cfg.path_save.cc)
+    write_excel(list_tables[2], cfg.path_save.collateral)
+    write_excel(list_tables[3], cfg.path_save.guarantee)
+    write_excel(list_tables[6], cfg.path_save.exposure)
     # write_excel(list_tables[7], "./output/ontable")
     # write_excel(list_tables[8], "./output/offtable")
     
