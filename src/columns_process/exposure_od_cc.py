@@ -301,46 +301,46 @@ def ccf(frame):
     )
     return frame
 
-ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
-    "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
-    "RRE_GEN","CRE_GEN"]
-w = ["RETAIL","SME_TT41"]
+# ae = ['BAD_DEBT', 'BAD_DEBT_RRE_GEN', 'CORP_GEN', 'SME', 'DOM_CIS', 'FOR_CIS', 'MDB', 'PSE'\
+#     "SOVEREIGN","COVERED BOND RATED","COVERED BOND UNRATED", "CRE_INC", "RRE_INC"\
+#     "RRE_GEN","CRE_GEN"]
+# w = ["RETAIL","SME_TT41"]
 
-col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
-    'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
+# col2cc = ['ASSET_CLASS', 'ASSET_SUB_CLASS', 'Specific Provision Bucket', 'CUST_RATING', 'CPTY_TYPE', 'CPTY_SUB_TYPE',\
+#     'LTV Bucket', 'RE_ELIGIBLE P60', 'CUST_RATING']
 
-def check2concat(col1, col2, col3, col4, col5, col8, col9):
-    if col1 in ae[:2]:
-        return ''.join([col2, col1, col4])
-    else:
-        if col1 in ae[2:11]:
-            return ''.join([col2, col1, col5])
-            # return concat_ws("",col2, col1, col5)
-        else:
-            if (col1 in ae[11:13]) and col9 == 'N':
-                return ''.join([col2, col1, col9])
-                # return concat_ws("",col2, col1, col9)
-            else:
-                if (col1 in ae[12:]) and (col9 == 'N') and (col8 in w):
-                    return ''.join([col2, col1, col9, col8])
-                    # return concat_ws("",col2, col1, col9, col8)
-                else:
-                    if (col1 in ae[12:]) and (col9 == 'N'):
-                        return ''.join([col2, col1, col9, col5, col8])
-                        # return concat_ws("",col2, col1, col9, col5, col8)
-                    else:
-                        if col1 in ae[11:14]:
-                            return ''.join([col2, col1, col7])
-                            # return concat_ws("",col2, col1, col7)
-                        else:
-                            if col1 == 'CRE_GEN' and col8 in w:
-                                return ''.join([col2, col1, col5, col7, col8])
-                                # return concat_ws("",col2, col1, col5, col7, col8)
-                            else:
-                                return ''.join([col2, col1])
-                                # return concat_ws("",col2, col1)
+# def check2concat(col1, col2, col3, col4, col5, col8, col9):
+#     if col1 in ae[:2]:
+#         return ''.join([col2, col1, col4])
+#     else:
+#         if col1 in ae[2:11]:
+#             return ''.join([col2, col1, col5])
+#             # return concat_ws("",col2, col1, col5)
+#         else:
+#             if (col1 in ae[11:13]) and col9 == 'N':
+#                 return ''.join([col2, col1, col9])
+#                 # return concat_ws("",col2, col1, col9)
+#             else:
+#                 if (col1 in ae[12:]) and (col9 == 'N') and (col8 in w):
+#                     return ''.join([col2, col1, col9, col8])
+#                     # return concat_ws("",col2, col1, col9, col8)
+#                 else:
+#                     if (col1 in ae[12:]) and (col9 == 'N'):
+#                         return ''.join([col2, col1, col9, col5, col8])
+#                         # return concat_ws("",col2, col1, col9, col5, col8)
+#                     else:
+#                         if col1 in ae[11:14]:
+#                             return ''.join([col2, col1, col7])
+#                             # return concat_ws("",col2, col1, col7)
+#                         else:
+#                             if col1 == 'CRE_GEN' and col8 in w:
+#                                 return ''.join([col2, col1, col5, col7, col8])
+#                                 # return concat_ws("",col2, col1, col5, col7, col8)
+#                             else:
+#                                 return ''.join([col2, col1])
+#                                 # return concat_ws("",col2, col1)
 
-check2concat = udf(check2concat, StringType())
+# check2concat = udf(check2concat, StringType())
 
 def re_eligible_p60(frame):
     tmp = frame.groupBy("CUSTOMER_ID").agg((count(when(col("COLL_TYPE") == 'CRM_RE', 1)).alias("countD")),\
@@ -421,6 +421,12 @@ def rw(frame):
                             when(col('2compare') == 0, col('RISK_WEIGHT')).otherwise('N/A'))
             ).otherwise('N/A')).drop('2compare')
 
+    # frame = frame.withColumn('RW', \
+    #                 when(col('RW').cast("string").contains("%"), \
+    #                         col('RW').cast("string").replace("%", "").cast("double") / 100.0)
+    #                 .otherwise(col('RW')))
+    frame = frame.withColumn('RW', when(col('RW').rlike('\%'), regexp_replace('RW', '%', '').cast('double')/100).otherwise(col('RW').cast('double')))
+    # frame = frame.withColumn('RW', col('RW').cast('double'))
     return frame
 
 def rw_cc(frame):
@@ -430,7 +436,8 @@ def rw_cc(frame):
                 when((col('ASSET_CLASS').isin('RESIDENTIAL_REAL_ESTATE', 'RETAIL')) & (col('EXPOSURE_CURRENCY')!=col('BORROWER_INCOME_SOURCE_CURR')) & (col('RW').cast('double')*0.15 < 0.15), col('RW')*0.15).otherwise(\
                     col('RW')))        
             ).otherwise(col('RW')))
-
+    frame = frame.withColumn('RW_CC', col('RW_CC').cast('double'))
+    # frame = frame.withColumn('RW_CC', when(col('RW_CC').like('%'), regexp_replace('RW_CC', '%', '').cast('double')/100).otherwise(col('RW_CC')).cast('double'))
     return frame
 
 def adjusted_coll_maturity(frame):
